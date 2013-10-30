@@ -22,8 +22,8 @@ void setup();
 void refreshScreen();
 void toggleLeds();
 float convertToTemperature( uint16_t reading );
-void displayTemperature();
-void displayLight();
+void readTemperature();
+void readLight();
 
 void setup() {
     // Set the clocking to run directly from the external crystal/oscillator.
@@ -74,7 +74,7 @@ float convertToTemperature( uint16_t reading ) {
     return ( ( outputVoltage - OFFSET_0C ) / TEMP_COEFF );
 }
 
-void displayTemperature( RetVal *retVal ) {
+void readTemperature( RetVal *retVal ) {
     uint16_t reading;
     float temperature;
 
@@ -88,7 +88,7 @@ void displayTemperature( RetVal *retVal ) {
     retVal->floatRet = temperature;
 }
 
-void displayLight( RetVal *retVal ) {
+void readLight( RetVal *retVal ) {
     unsigned short lightLevel;
     
     lightLevel = alsRead();
@@ -105,7 +105,7 @@ void noOp( RetVal *retVal ) {
 int main() {
     setup();
     const char *menus[] = { "Temperature", "Light Level", "X Accelleration", "Y Acceleration", "Z Acceleration" };
-    Function functions[] = { displayTemperature, displayLight, noOp, noOp, noOp };
+    Function functions[] = { readTemperature, readLight, noOp, noOp, noOp };
     
     createMenu( "Simple Sensor Monitor", 5, menus, functions );
 
