@@ -1,6 +1,5 @@
 #include "bsp.h"
 #include "bsp_led.h"
-#include "lcd_dogm128_6.h"
 #include "als_sfh5711.h"
 #include "adc.h"
 #include "gptimer.h"
@@ -10,6 +9,8 @@
 #include "hw_ints.h"
 #include "hw_rfcore_xreg.h"
 #include "interrupt.h"
+#include "lcd.h"
+#include "lcd_dogm128_6.h"
 #include <stdint.h>
 
 // Constants for converting to temerature
@@ -33,10 +34,8 @@ void setup() {
     SysCtrlIOClockSet( SYS_CTRL_SYSDIV_32MHZ );
     // Enable the RF Core
     SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
-  
-    bspInit( BSP_SYS_CLK_SPD );
-    bspSpiInit( BSP_SPI_CLK_SPD );
-    lcdInit();
+    
+    fullLcdInit();
     
     SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT0);
     TimerConfigure( GPTIMER0_BASE, GPTIMER_CFG_SPLIT_PAIR | 
@@ -64,11 +63,6 @@ void setup() {
     IntEnable( INT_TIMER0A );
     IntEnable( INT_TIMER0B );
     IntMasterEnable();
-}
-
-void refreshScreen() {
-    TimerIntClear( GPTIMER0_BASE, GPTIMER_TIMA_TIMEOUT );
-    lcdSendBuffer( 0 );
 }
 
 void toggleLeds() {
@@ -102,11 +96,9 @@ void displayLight() {
 
 int main() {
     setup();
+    const char *menus[] = { "Temperature:", "Light Level:" };
     
-    lcdBufferClear( 0 );
-    lcdBufferPrintString( 0, "Simple Sensor Monitor", 0, eLcdPage0 );
-    lcdBufferPrintString( 0, "Temperature: ", 0, eLcdPage1 );
-    lcdBufferPrintString( 0, "Light Level: ", 0, eLcdPage2 );
+    createMenu( "Simple Sensor Monitor", 2, menus );
 
     while( 1 ) {
         displayTemperature();
