@@ -10,6 +10,7 @@
 #include "hw_rfcore_xreg.h"
 #include "interrupt.h"
 #include "lcd.h"
+#include "keys.h"
 #include <stdint.h>
 
 // Constants for converting to temerature
@@ -35,6 +36,7 @@ void setup() {
     SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
     
     fullLcdInit();
+    keyInit();
     
     SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT0);
     TimerConfigure( GPTIMER0_BASE, GPTIMER_CFG_SPLIT_PAIR | 

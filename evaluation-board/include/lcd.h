@@ -13,5 +13,7 @@ struct RetVal {
 };
 
 void fullLcdInit( void );
+void upKeyPress( void );
+void downKeyPress( void );
 void refreshScreen( void );
 void createMenu( const char *header, int menuCount, const char *menu[], Function function[] );

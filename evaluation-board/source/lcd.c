@@ -12,10 +12,32 @@ struct LcdState {
 
 struct LcdState lcdState = { 0 };
 
+void invertHovered( void );
+
 void fullLcdInit( void ) {
     bspInit( BSP_SYS_CLK_SPD );
     bspSpiInit( BSP_SPI_CLK_SPD );
     lcdInit();
+}
+
+void invertHovered( void ) {
+    lcdBufferInvertPage( 0, 0, 127, eLcdPage1 + lcdState.menuHover );
+}
+
+void upKeyPress( void ) {
+    if( lcdState.menuHover > 0 ) {
+        invertHovered();
+        lcdState.menuHover--;
+        invertHovered();
+    }
+}
+
+void downKeyPress( void ) {
+    if( lcdState.menuHover < lcdState.menuCount - 1 ) {
+        invertHovered();
+        lcdState.menuHover++;
+        invertHovered();
+    }
 }
 
 void refreshScreen( void ) {
@@ -55,4 +77,6 @@ void createMenu( const char *header, int menuCount, const char *menu[], Function
     for( i = 0; i < menuCount; ++i ) {
         lcdBufferPrintString( 0, menu[i], 0, lcdState.page++ );
     }
+    
+    lcdBufferInvertPage( 0, 0, 127, eLcdPage1 );
 }
