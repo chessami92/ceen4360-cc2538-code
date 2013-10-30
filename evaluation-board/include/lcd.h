@@ -1,4 +1,5 @@
 typedef struct RetVal RetVal;
+typedef void ( *Function )( RetVal* );
 
 typedef enum {
     RET_TYPE_INT,
@@ -13,4 +14,4 @@ struct RetVal {
 
 void fullLcdInit( void );
 void refreshScreen( void );
-void createMenu( const char *header, int menuCount, const char *menu[] );
+void createMenu( const char *header, int menuCount, const char *menu[], Function function[] );

@@ -75,7 +75,7 @@ float convertToTemperature( uint16_t reading ) {
     return ( ( outputVoltage - OFFSET_0C ) / TEMP_COEFF );
 }
 
-void displayTemperature() {
+void displayTemperature( RetVal *retVal ) {
     uint16_t reading;
     float temperature;
 
@@ -84,24 +84,31 @@ void displayTemperature() {
 
     reading = SOCADCDataGet() >> SOCADC_12_BIT_RSHIFT;
     temperature = convertToTemperature( reading );
-    lcdBufferPrintFloatAligned( 0, temperature, 2, eLcdAlignRight, eLcdPage1 );
+    
+    retVal->retType = RET_TYPE_FLOAT;
+    retVal->floatRet = temperature;
 }
 
-void displayLight() {
+void displayLight( RetVal *retVal ) {
     unsigned short lightLevel;
     
     lightLevel = alsRead();
-    lcdBufferPrintIntAligned( 0, lightLevel, eLcdAlignRight, eLcdPage2 );
+    
+    retVal->retType = RET_TYPE_INT;
+    retVal->intRet = lightLevel;
+}
+
+void noOp( RetVal *retVal ) {
+    retVal->retType = RET_TYPE_INT;
+    retVal->intRet = -1;
 }
 
 int main() {
     setup();
-    const char *menus[] = { "Temperature:", "Light Level:" };
+    const char *menus[] = { "Temperature", "Light Level", "X Accelleration", "Y Acceleration", "Z Acceleration" };
+    Function functions[] = { displayTemperature, displayLight, noOp, noOp, noOp };
     
-    createMenu( "Simple Sensor Monitor", 2, menus );
+    createMenu( "Simple Sensor Monitor", 5, menus, functions );
 
-    while( 1 ) {
-        displayTemperature();
-        displayLight();
-    }
+    while( 1 ) {}
 }
