@@ -10,7 +10,6 @@
 #include "hw_rfcore_xreg.h"
 #include "interrupt.h"
 #include "lcd.h"
-#include "lcd_dogm128_6.h"
 #include <stdint.h>
 
 // Constants for converting to temerature
