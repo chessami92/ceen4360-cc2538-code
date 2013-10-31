@@ -29,6 +29,7 @@ void upKeyPress( void ) {
         invertHovered();
         lcdState.menuHover--;
         invertHovered();
+        lcdSendBufferPart( 0, 0, 127, eLcdPage1 + lcdState.menuHover, eLcdPage2 + lcdState.page );
     }
 }
 
@@ -37,6 +38,7 @@ void downKeyPress( void ) {
         invertHovered();
         lcdState.menuHover++;
         invertHovered();
+        lcdSendBufferPart( 0, 0, 127, eLcdPage0 + lcdState.menuHover, eLcdPage1 + lcdState.page );
     }
 }
 
@@ -59,7 +61,7 @@ void refreshScreen( void ) {
         }
     }
     
-    lcdSendBuffer( 0 );
+    lcdSendBufferPart( 0, 0, 127, lcdState.page, lcdState.page );
 }
 
 void createMenu( const char *header, int menuCount, const char *menu[], Function hoverFunction[] ) {
@@ -79,4 +81,6 @@ void createMenu( const char *header, int menuCount, const char *menu[], Function
     }
     
     lcdBufferInvertPage( 0, 0, 127, eLcdPage1 );
+    
+    lcdSendBuffer( 0 );
 }
