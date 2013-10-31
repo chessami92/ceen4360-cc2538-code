@@ -11,6 +11,7 @@
 #include "interrupt.h"
 #include "lcd.h"
 #include "keys.h"
+#include "acc.h"
 #include <stdint.h>
 
 // Constants for converting to temerature
@@ -33,9 +34,12 @@ void setup() {
     // Set IO clock to the same as system clock
     SysCtrlIOClockSet( SYS_CTRL_SYSDIV_32MHZ );
     // Enable the RF Core
-    SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
+    SysCtrlPeripheralEnable( SYS_CTRL_PERIPH_RFC );
     
+    bspInit( BSP_SYS_CLK_SPD );
+    bspSpiInit( BSP_SPI_CLK_SPD );
     fullLcdInit();
+    fullAccInit();
     keyInit();
     
     SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT0);
@@ -99,17 +103,13 @@ void readLight( RetVal *retVal ) {
     retVal->intRet = lightLevel;
 }
 
-void noOp( RetVal *retVal ) {
-    retVal->retType = RET_TYPE_INT;
-    retVal->intRet = -1;
-}
-
 int main() {
     setup();
+    
     const char *menus[] = { "Temperature", "Light Level", "X Accelleration", "Y Acceleration", "Z Acceleration" };
-    Function functions[] = { readTemperature, readLight, noOp, noOp, noOp };
+    Function functions[] = { readTemperature, readLight, readAccX, readAccY, readAccZ };
     
     createMenu( "Simple Sensor Monitor", 5, menus, functions );
-
+    
     while( 1 ) {}
 }

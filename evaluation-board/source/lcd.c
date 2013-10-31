@@ -15,8 +15,6 @@ struct LcdState lcdState = { 0 };
 void invertHovered( void );
 
 void fullLcdInit( void ) {
-    bspInit( BSP_SYS_CLK_SPD );
-    bspSpiInit( BSP_SPI_CLK_SPD );
     lcdInit();
 }
 
