@@ -16,10 +16,15 @@ Menu sensorMenu = { "Simple Sensor Monitor", 5,
     { readTemperature, readLight, readAccX, readAccY, readAccZ }
 };
 
-Menu mainMenu = { "Main Menu", 1, 
-    { "Sensor Menu" },
-    { noOp },
-    { &sensorMenu }
+Menu zigbeeMenu = { "Zigbee Communication", 2,
+    { "Send Packets", "Receive Packets" },
+    { noOp, noOp },
+};
+
+Menu mainMenu = { "Main Menu", 2, 
+    { "Sensor Menu", "Zigbee Menu" },
+    { noOp, noOp },
+    { &sensorMenu, &zigbeeMenu }
 };
 
 void setup() {
