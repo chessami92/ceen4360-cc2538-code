@@ -6,13 +6,12 @@
 #include "lcd.h"
 
 struct LcdState {
-    int menuCount;
     int menuHover;
     tLcdPage page;
-    Function hoverFunction[6];
 };
 
 struct LcdState lcdState = { 0 };
+Menu *currentMenu;
 
 void invertHovered( void );
 void invertScreen( void );
@@ -33,6 +32,10 @@ void invertScreen( void ) {
 }
 
 void upKeyPress( void ) {
+    if( !currentMenu ) {
+        return;
+    }
+    
     if( lcdState.menuHover > 0 ) {
         invertHovered();
         lcdState.menuHover--;
@@ -43,7 +46,11 @@ void upKeyPress( void ) {
 }
 
 void downKeyPress( void ) {
-    if( lcdState.menuHover < lcdState.menuCount - 1 ) {
+    if( !currentMenu ) {
+        return;
+    }
+    
+    if( lcdState.menuHover < currentMenu->menuCount - 1 ) {
         invertHovered();
         lcdState.menuHover++;
         invertHovered();
@@ -57,10 +64,14 @@ void refreshScreen( void ) {
     
     TimerIntClear( GPTIMER0_BASE, GPTIMER_TIMA_TIMEOUT );
     
-    if( lcdState.menuCount > 0 ) {
+    if( !currentMenu ) {
+        return;
+    }
+    
+    if( currentMenu->menuCount > 0 ) {
         lcdBufferClearPage( 0, lcdState.page );
         
-        ( *lcdState.hoverFunction[lcdState.menuHover] )( &retVal );
+        ( *currentMenu->hoverFunction[lcdState.menuHover] )( &retVal );
         switch( retVal.retType ) {
         case RET_TYPE_INT: 
             lcdBufferPrintInt( 0, retVal.intRet, 0, lcdState.page );
@@ -83,20 +94,17 @@ void flashScreen( void ) {
     }
 }
 
-void createMenu( const char *header, int menuCount, const char *menu[], Function hoverFunction[] ) {
+void createMenu( Menu *menu ) {
     int i;
+    currentMenu = menu;
     
-    lcdState.menuCount = menuCount;
-    lcdState.menuHover = 0;
+    lcdState.currentMenuHover = 0;
     lcdState.page = eLcdPage0;
-    for( i = 0; i < menuCount; ++i ) {
-        lcdState.hoverFunction[i] = hoverFunction[i];
-    }
     
-    lcdBufferPrintString( 0, header, 0, lcdState.page++ );
+    lcdBufferPrintString( 0, currentMenu->header, 0, lcdState.page++ );
     
-    for( i = 0; i < menuCount; ++i ) {
-        lcdBufferPrintString( 0, menu[i], 0, lcdState.page++ );
+    for( i = 0; i < currentMenu->currentMenuCount; ++i ) {
+        lcdBufferPrintString( 0, currentMenu->currentMenu[i], 0, lcdState.page++ );
     }
     
     lcdBufferInvertPage( 0, 0, 127, eLcdPage1 );

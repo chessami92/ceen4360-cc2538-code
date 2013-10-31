@@ -11,6 +11,11 @@
 #include "timer.h"
 #include <stdint.h>
 
+Menu mainMenu = { "Simple Sensor Monitor", 5, 
+    { "Temperature", "Light Level", "X Accelleration", "Y Acceleration", "Z Acceleration" },
+    { readTemperature, readLight, readAccX, readAccY, readAccZ },
+};
+
 void setup() {
     // Set the clocking to run directly from the external crystal/oscillator.
     // (no ext 32k osc, no internal osc)
@@ -35,10 +40,7 @@ void setup() {
 int main() {
     setup();
     
-    const char *menus[] = { "Temperature", "Light Level", "X Accelleration", "Y Acceleration", "Z Acceleration" };
-    Function functions[] = { readTemperature, readLight, readAccX, readAccY, readAccZ };
-    
-    createMenu( "Simple Sensor Monitor", 5, menus, functions );
+    createMenu( &mainMenu );
     
     while( 1 ) {}
 }
