@@ -33,8 +33,10 @@ void GPIOCIntHandler( void ) {
     uint32_t bitsChanged = GPIOPinIntStatus( GPIO_C_BASE, true );
 
     if( bitsChanged & LEFT_KEY ) {
+        parentMenu();
         debounce( GPIO_C_BASE, GPIO_PIN_4 );
     } else if( bitsChanged & RIGHT_KEY ) {
+        childMenu();
         debounce( GPIO_C_BASE, GPIO_PIN_5 );
     } else if( bitsChanged & UP_KEY ) {
         upKeyPress();

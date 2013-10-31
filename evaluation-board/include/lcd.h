@@ -4,7 +4,8 @@ typedef void ( *Function )( RetVal* );
 
 typedef enum {
     RET_TYPE_INT,
-    RET_TYPE_FLOAT
+    RET_TYPE_FLOAT,
+    RET_TYPE_NONE
 } RetType;
 
 struct Menu {
@@ -12,8 +13,8 @@ struct Menu {
     const int menuCount;
     const char *menu[6];
     const Function hoverFunction[6];
-    const Menu *subMenu[6];
-    const Menu *parentMenu;
+    Menu *subMenu[6];
+    Menu *parentMenu;
 };
 
 struct RetVal {
@@ -25,6 +26,9 @@ struct RetVal {
 void fullLcdInit( void );
 void upKeyPress( void );
 void downKeyPress( void );
+void parentMenu( void );
+void childMenu( void );
 void refreshScreen( void );
 void flashScreen( void );
+void noOp( RetVal *retVal );
 void createMenu( Menu *menu );

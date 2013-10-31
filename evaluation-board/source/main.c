@@ -11,9 +11,15 @@
 #include "timer.h"
 #include <stdint.h>
 
-Menu mainMenu = { "Simple Sensor Monitor", 5, 
+Menu sensorMenu = { "Simple Sensor Monitor", 5, 
     { "Temperature", "Light Level", "X Accelleration", "Y Acceleration", "Z Acceleration" },
-    { readTemperature, readLight, readAccX, readAccY, readAccZ },
+    { readTemperature, readLight, readAccX, readAccY, readAccZ }
+};
+
+Menu mainMenu = { "Main Menu", 1, 
+    { "Sensor Menu" },
+    { noOp },
+    { &sensorMenu }
 };
 
 void setup() {

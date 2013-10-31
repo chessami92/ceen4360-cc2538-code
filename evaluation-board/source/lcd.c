@@ -15,6 +15,7 @@ Menu *currentMenu;
 
 void invertHovered( void );
 void invertScreen( void );
+int followMenu( Menu *menu );
 
 void fullLcdInit( void ) {
     lcdInit();
@@ -59,6 +60,38 @@ void downKeyPress( void ) {
     }
 }
 
+int followMenu( Menu *menu ) {
+    if( menu ) {
+        createMenu( menu );
+        return 1;
+    } else {
+        flashScreen();
+        return 0;
+    }
+}
+
+void parentMenu( void ) {
+    if( !currentMenu ) {
+        return;
+    }
+    
+    followMenu( currentMenu->parentMenu );
+}
+
+void childMenu( void ) {
+    Menu *previousMenu;
+    
+    if( !currentMenu ) {
+        return;
+    }
+    
+    previousMenu = currentMenu;
+    
+    if( followMenu( currentMenu->subMenu[lcdState.menuHover] ) ) {
+        currentMenu->parentMenu = previousMenu;
+    }
+}
+
 void refreshScreen( void ) {
     RetVal retVal;
     
@@ -90,21 +123,26 @@ void flashScreen( void ) {
     
     for( i = 0; i < 4; ++i ) {
         invertScreen();
-        SysCtrlDelay( 500000 ); // Abount 50ms
+        SysCtrlDelay( 1000000 ); // Abount 50ms
     }
+}
+
+void noOp( RetVal *retVal ) {
+    retVal->retType = RET_TYPE_NONE;
 }
 
 void createMenu( Menu *menu ) {
     int i;
     currentMenu = menu;
     
-    lcdState.currentMenuHover = 0;
+    lcdState.menuHover = 0;
     lcdState.page = eLcdPage0;
     
+    lcdBufferClear( 0 );
     lcdBufferPrintString( 0, currentMenu->header, 0, lcdState.page++ );
     
-    for( i = 0; i < currentMenu->currentMenuCount; ++i ) {
-        lcdBufferPrintString( 0, currentMenu->currentMenu[i], 0, lcdState.page++ );
+    for( i = 0; i < currentMenu->menuCount; ++i ) {
+        lcdBufferPrintString( 0, currentMenu->menu[i], 0, lcdState.page++ );
     }
     
     lcdBufferInvertPage( 0, 0, 127, eLcdPage1 );
