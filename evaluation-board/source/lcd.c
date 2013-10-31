@@ -1,6 +1,8 @@
 #include "bsp.h"
-#include "lcd_dogm128_6.h"
 #include "gptimer.h"
+#include "lcd_dogm128_6.h"
+#include "sys_ctrl.h"
+
 #include "lcd.h"
 
 struct LcdState {
@@ -13,13 +15,21 @@ struct LcdState {
 struct LcdState lcdState = { 0 };
 
 void invertHovered( void );
+void invertScreen( void );
 
 void fullLcdInit( void ) {
     lcdInit();
 }
 
 void invertHovered( void ) {
-    lcdBufferInvertPage( 0, 0, 127, eLcdPage1 + lcdState.menuHover );
+    tLcdPage menuHover = eLcdPage1 + lcdState.menuHover;
+    lcdBufferInvertPage( 0, 0, 127, menuHover );
+    lcdSendBufferPart( 0, 0, 127, menuHover, menuHover );
+}
+
+void invertScreen( void ) {
+    lcdBufferInvert( 0, 0, 0, 127, 63 );
+    lcdSendBuffer( 0 );
 }
 
 void upKeyPress( void ) {
@@ -27,7 +37,8 @@ void upKeyPress( void ) {
         invertHovered();
         lcdState.menuHover--;
         invertHovered();
-        lcdSendBufferPart( 0, 0, 127, eLcdPage1 + lcdState.menuHover, eLcdPage2 + lcdState.page );
+    } else {
+        flashScreen();
     }
 }
 
@@ -36,7 +47,8 @@ void downKeyPress( void ) {
         invertHovered();
         lcdState.menuHover++;
         invertHovered();
-        lcdSendBufferPart( 0, 0, 127, eLcdPage0 + lcdState.menuHover, eLcdPage1 + lcdState.page );
+    } else {
+        flashScreen();
     }
 }
 
@@ -60,6 +72,15 @@ void refreshScreen( void ) {
     }
     
     lcdSendBufferPart( 0, 0, 127, lcdState.page, lcdState.page );
+}
+
+void flashScreen( void ) {
+    int i;
+    
+    for( i = 0; i < 4; ++i ) {
+        invertScreen();
+        SysCtrlDelay( 500000 ); // Abount 50ms
+    }
 }
 
 void createMenu( const char *header, int menuCount, const char *menu[], Function hoverFunction[] ) {
