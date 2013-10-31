@@ -1,6 +1,6 @@
 #include "bsp.h"
 #include "acc_bma250.h"
-#include "sys_ctrl.h"
+
 #include "lcd.h"
 #include "acc.h"
 
