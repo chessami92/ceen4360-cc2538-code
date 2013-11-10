@@ -1,5 +1,6 @@
 #include "bsp.h"
 #include "acc_bma250.h"
+#include "hw_rfcore_xreg.h"
 
 #include "lcd.h"
 #include "acc.h"
@@ -11,6 +12,9 @@ void fullAccInit( void ) {
 }
 
 void readAcc() {
+    // Disable the temperature sensor
+    HWREG( RFCORE_XREG_ATEST ) = 0x00;
+    
     accReadData( &accX, &accY, &accZ );
 }
 
