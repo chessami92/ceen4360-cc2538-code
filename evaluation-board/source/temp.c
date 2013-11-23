@@ -24,8 +24,6 @@ void tempInit( void ) {
     SysCtrlPeripheralEnable( SYS_CTRL_PERIPH_RFC );
     // Connect temperature sensor to ADC
     HWREG( CCTEST_TR0 ) |= CCTEST_TR0_ADCTM;
-    // Enable the temperature sensor
-    HWREG( RFCORE_XREG_ATEST ) = 0x01;
     SOCADCSingleConfigure( SOCADC_12_BIT, SOCADC_REF_INTERNAL );
 }
 
@@ -37,6 +35,9 @@ float convertToTemperature( uint16_t reading ) {
 void readTemperature( RetVal *retVal ) {
     uint16_t reading;
     float temperature;
+    
+    // Enable the temperature sensor
+    HWREG( RFCORE_XREG_ATEST ) = 0x01;
 
     SOCADCSingleStart( SOCADC_TEMP_SENS );
     while( !SOCADCEndOfCOnversionGet() ) {}
