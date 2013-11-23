@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>913047148</fileChecksum>
+  <configuration>
+    <name>Debug</name>
+    <outputs>
+      <file>$PROJ_DIR$\API Def\hw_types.h</file>
+      <file>$TOOLKIT_DIR$\lib\dl7M_tln.a</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\lcd.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdbool.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\acc.pbi</file>
+      <file>$TOOLKIT_DIR$\lib\m7M_tl.a</file>
+      <file>$PROJ_DIR$\BSP API\bsp_led.h</file>
+      <file>$PROJ_DIR$\Debug\Exe\c.out</file>
+      <file>$PROJ_DIR$\Debug\Obj\Project.pbd</file>
+      <file>$PROJ_DIR$\API\gpio.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\accelerometer.pbi</file>
+      <file>$PROJ_DIR$\API\sys_ctrl.h</file>
+      <file>$PROJ_DIR$\BSP API\als_sfh5711.h</file>
+      <file>$PROJ_DIR$\API\gptimer.h</file>
+      <file>$PROJ_DIR$\lib\driverlib.lib</file>
+      <file>$PROJ_DIR$\lib\bsp.lib</file>
+      <file>$TOOLKIT_DIR$\lib\shb_l.a</file>
+      <file>$PROJ_DIR$\Debug\Obj\accelerometer.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\adc.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\light.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\led.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\startup_iar.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\startup_iar.pbi</file>
+      <file>$PROJ_DIR$\API\adc.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\timer.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\timer.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\led.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
+      <file>$TOOLKIT_DIR$\lib\rt7M_tl.a</file>
+      <file>$PROJ_DIR$\API Def\hw_ints.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\adc.o</file>
+      <file>$TOOLKIT_DIR$\config\linker\TexasInstruments\cx2538xf53.icf</file>
+      <file>$PROJ_DIR$\API Def\hw_cctest.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\light.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$PROJ_DIR$\BSP API\lcd_dogm128_6.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\acc.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
+      <file>$PROJ_DIR$\include\keys.h</file>
+      <file>$PROJ_DIR$\include\light.h</file>
+      <file>$PROJ_DIR$\include\acc.h</file>
+      <file>$PROJ_DIR$\include\lcd.h</file>
+      <file>$PROJ_DIR$\include\led.h</file>
+      <file>$PROJ_DIR$\include\temp.h</file>
+      <file>$PROJ_DIR$\include\timer.h</file>
+      <file>$PROJ_DIR$\source\acc.c</file>
+      <file>$PROJ_DIR$\source\keys.c</file>
+      <file>$PROJ_DIR$\source\lcd.c</file>
+      <file>$PROJ_DIR$\source\led.c</file>
+      <file>$PROJ_DIR$\source\light.c</file>
+      <file>$PROJ_DIR$\source\main.c</file>
+      <file>$PROJ_DIR$\source\temp.c</file>
+      <file>$PROJ_DIR$\source\timer.c</file>
+      <file>$PROJ_DIR$\source\startup_iar.c</file>
+      <file>$PROJ_DIR$\Debug\Obj\temp.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\temp.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\keys.o</file>
+      <file>$PROJ_DIR$\API\interrupt.h</file>
+      <file>$PROJ_DIR$\API\ioc.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\keys.pbi</file>
+      <file>$PROJ_DIR$\source\adc.c</file>
+      <file>$PROJ_DIR$\BSP API\acc_bma250.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\lcd.o</file>
+      <file>$PROJ_DIR$\source\accelerometer.c</file>
+      <file>$PROJ_DIR$\API Def\hw_rfcore_xreg.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.o</file>
+      <file>$PROJ_DIR$\BSP API\bsp.h</file>
+      <file>$PROJ_DIR$\API Def\hw_memmap.h</file>
+    </outputs>
+    <file>
+      <name>$PROJ_DIR$\Debug\Exe\c.out</name>
+      <inputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 35 42 62 68 29 21 71 23 60 28 17 16 18 31 7 1</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 9</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\acc.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 42</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 6</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 67 70 47 46</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 67 70 47 46</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\keys.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 62</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 65</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 32 73 11 0 43 26 38 2 30 40 41 33 5 63 64 47 44</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 32 73 11 0 43 26 38 2 30 40 41 33 5 63 64 47 44</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\lcd.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 68</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 3</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 15 39 13 47</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 15 39 13 47</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\led.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 29</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 22</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 8 11 15 47 48</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 8 11 15 47 48</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\light.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 21</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 37</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 14 47 45</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 14 47 45</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\main.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 71</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 4</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 13 63 47 46 44 48 45 49 50</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 13 63 47 46 44 48 45 49 50</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\temp.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 60</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 61</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 25 15 13 36 32 70 63 47 49</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 72 0 43 26 38 2 30 40 41 33 5 73 25 15 13 36 32 70 63 47 49</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\timer.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 28</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 27</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 15 0 43 26 38 2 30 40 41 33 5 32 73 63 13 47 48 50</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 15 0 43 26 38 2 30 40 41 33 5 32 73 63 13 47 48 50</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\startup_iar.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 24</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 43 26 38 2 30 40 41 33</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 43 26 38 2 30 40 41 33</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\adc.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 34</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 20</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\source\accelerometer.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 19</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 12</file>
+        </tool>
+      </outputs>
+    </file>
+  </configuration>
+  <configuration>
+    <name>Release</name>
+    <outputs/>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>ILINK</tool>
+    </forcedrebuild>
+    <forcedrebuild>
+      <name>[REBUILD_ALL]</name>
+    </forcedrebuild>
+  </configuration>
+</project>
+
+
