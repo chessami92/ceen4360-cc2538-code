@@ -2113,15 +2113,15 @@
         <option>
           <name>CCDefines</name>
           <state>ewarm</state>
-          <state>NWK_AUTO_POLL</state>
-          <state>xPOWER_SAVING</state>
+          <state>xNWK_AUTO_POLL</state>
+          <state>POWER_SAVING</state>
           <state>ZTOOL_P1</state>
           <state>MT_TASK</state>
-          <state>MT_SYS_FUNC</state>
-          <state>MT_ZDO_FUNC</state>
-          <state>xLCD_SUPPORTED=DEBUG</state>
+          <state>xMT_SYS_FUNC</state>
+          <state>xMT_ZDO_FUNC</state>
+          <state>LCD_SUPPORTED=DEBUG</state>
           <state>CC2538_USE_ALTERNATE_INTERRUPT_MAP=1</state>
-          <state>TC_LINKKEY_JOIN</state>
+          <state>xTC_LINKKEY_JOIN</state>
           <state>HAL_UART_USB</state>
           <state>USB_SETUP_MAX_NUMBER_OF_INTERFACES=1</state>
         </option>
