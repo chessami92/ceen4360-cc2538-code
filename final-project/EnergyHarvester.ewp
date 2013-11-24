@@ -87,7 +87,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>6.50.5.4846</state>
+          <state>6.60.2.5494</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -180,6 +180,7 @@
           <state>LCD_SUPPORTED=DEBUG</state>
           <state>CC2538_USE_ALTERNATE_INTERRUPT_MAP=1</state>
           <state>TC_LINKKEY_JOIN</state>
+          <state>USB_SETUP_MAX_NUMBER_OF_INTERFACES=2</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -1056,7 +1057,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>6.50.5.4846</state>
+          <state>6.60.2.5494</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -1149,6 +1150,7 @@
           <state>LCD_SUPPORTED=DEBUG</state>
           <state>CC2538_USE_ALTERNATE_INTERRUPT_MAP=1</state>
           <state>TC_LINKKEY_JOIN</state>
+          <state>USB_SETUP_MAX_NUMBER_OF_INTERFACES=2</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -2117,9 +2119,11 @@
           <state>MT_TASK</state>
           <state>MT_SYS_FUNC</state>
           <state>MT_ZDO_FUNC</state>
-          <state>LCD_SUPPORTED=DEBUG</state>
+          <state>xLCD_SUPPORTED=DEBUG</state>
           <state>CC2538_USE_ALTERNATE_INTERRUPT_MAP=1</state>
           <state>TC_LINKKEY_JOIN</state>
+          <state>HAL_UART_USB</state>
+          <state>USB_SETUP_MAX_NUMBER_OF_INTERFACES=1</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -2275,6 +2279,9 @@
           <state>$PROJ_DIR$\Components\stack\zdo</state>
           <state>$PROJ_DIR$\Components\zmac</state>
           <state>$PROJ_DIR$\Components\zmac\f8w</state>
+          <state>$PROJ_DIR$\Components\usblib\cc2538\source\class_cdc</state>
+          <state>$PROJ_DIR$\Components\usblib\cc2538\source\library</state>
+          <state>$PROJ_DIR$\Components\usblib\cc2538\source\library\cc2538</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2728,6 +2735,7 @@
           <state>$PROJ_DIR$\Libraries\TIMAC\bin\TIMAC-CC2538.a</state>
           <state>$PROJ_DIR$\Components\driverlib\cc2538\bin\iar\sdriverlib.lib</state>
           <state>$PROJ_DIR$\Components\bsp\srf06eb_cc2538\drivers\bin\iar\bsp.lib</state>
+          <state>$PROJ_DIR$\Components\usblib\cc2538\bin\iar\usbcdc.lib</state>
         </option>
         <option>
           <name>IlinkOverrideProgramEntryLabel</name>
@@ -2917,13 +2925,13 @@
       <name>$PROJ_DIR$\Source\OSAL_EnergyHarvester.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\Source\zcl_samplelight.c</name>
+      <name>$PROJ_DIR$\Source\zcl_EnergyHarvester.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\Source\zcl_samplelight.h</name>
+      <name>$PROJ_DIR$\Source\zcl_EnergyHarvester.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\Source\zcl_samplelight_data.c</name>
+      <name>$PROJ_DIR$\Source\zcl_EnergyHavester_data.c</name>
     </file>
   </group>
   <group>
@@ -3448,10 +3456,19 @@
   <group>
     <name>USB</name>
     <file>
-      <name>$PROJ_DIR$\Components\usblib\cc2538\source\class_cdc\app_usb_descriptor.h</name>
+      <name>$PROJ_DIR$\Components\usblib\cc2538\source\library\cc2538\usb.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\Components\usblib\cc2538\source\class_cdc\usb_cdc.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Components\usblib\cc2538\source\library\cc2538\usb_firmware_library_headers.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Components\usblib\cc2538\source\library\usb_in_buffer.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Components\usblib\cc2538\source\library\usb_out_buffer.h</name>
     </file>
   </group>
   <group>

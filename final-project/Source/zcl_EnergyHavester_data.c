@@ -50,7 +50,7 @@
 #include "zcl_general.h"
 #include "zcl_ha.h"
 
-#include "zcl_samplelight.h"
+#include "zcl_EnergyHarvester.h"
 
 /*********************************************************************
  * CONSTANTS

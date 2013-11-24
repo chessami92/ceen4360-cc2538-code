@@ -257,7 +257,7 @@
       <name>CMSISDAP_ID</name>
       <archiveVersion>2</archiveVersion>
       <data>
-        <version>0</version>
+        <version>1</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -397,6 +397,26 @@
         <option>
           <name>CMSISDAPMultiCPUNumber</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>OCProbeCfgOverride</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>OCProbeConfig</name>
+          <state></state>
+        </option>
+        <option>
+          <name>CMSISDAPProbeConfigRadio</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>CMSISDAPSelectedCPUBehaviour</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>ICpuName</name>
+          <state></state>
         </option>
       </data>
     </settings>
@@ -1554,7 +1574,7 @@
       <name>CMSISDAP_ID</name>
       <archiveVersion>2</archiveVersion>
       <data>
-        <version>0</version>
+        <version>1</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -1694,6 +1714,26 @@
         <option>
           <name>CMSISDAPMultiCPUNumber</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>OCProbeCfgOverride</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>OCProbeConfig</name>
+          <state></state>
+        </option>
+        <option>
+          <name>CMSISDAPProbeConfigRadio</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>CMSISDAPSelectedCPUBehaviour</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>ICpuName</name>
+          <state></state>
         </option>
       </data>
     </settings>
@@ -2643,7 +2683,7 @@
         </option>
         <option>
           <name>RunToEnable</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>RunToName</name>
@@ -2671,7 +2711,7 @@
         </option>
         <option>
           <name>OCDownloadVerifyAll</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>OCProductVersion</name>
@@ -2683,7 +2723,7 @@
         </option>
         <option>
           <name>OCLastSavedByProductVersion</name>
-          <state>6.50.5.4846</state>
+          <state>6.60.2.5494</state>
         </option>
         <option>
           <name>OCDownloadAttachToProgram</name>
@@ -2851,7 +2891,7 @@
       <name>CMSISDAP_ID</name>
       <archiveVersion>2</archiveVersion>
       <data>
-        <version>0</version>
+        <version>1</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -2991,6 +3031,26 @@
         <option>
           <name>CMSISDAPMultiCPUNumber</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>OCProbeCfgOverride</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>OCProbeConfig</name>
+          <state></state>
+        </option>
+        <option>
+          <name>CMSISDAPProbeConfigRadio</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>CMSISDAPSelectedCPUBehaviour</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>ICpuName</name>
+          <state></state>
         </option>
       </data>
     </settings>

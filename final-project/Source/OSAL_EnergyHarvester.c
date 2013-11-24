@@ -58,7 +58,7 @@
   #include "aps_frag.h"
 #endif
 
-#include "zcl_samplelight.h"
+#include "zcl_EnergyHarvester.h"
 
 /*********************************************************************
  * GLOBAL VARIABLES
@@ -81,7 +81,7 @@ const pTaskEventHandlerFn tasksArr[] = {
   ZDNwkMgr_event_loop,
 #endif
   zcl_event_loop,
-  zclSampleLight_event_loop
+  zclEnergyHarvester_event_loop
 };
 
 const uint8 tasksCnt = sizeof( tasksArr ) / sizeof( tasksArr[0] );
@@ -122,7 +122,7 @@ void osalInitTasks( void )
   ZDNwkMgr_Init( taskID++ );
 #endif
   zcl_Init( taskID++ );
-  zclSampleLight_Init( taskID );
+  zclEnergyHarvester_Init( taskID++ );
 }
 
 /*********************************************************************

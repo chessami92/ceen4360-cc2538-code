@@ -56,7 +56,7 @@
 #include "zcl_general.h"
 #include "zcl_ha.h"
 
-#include "zcl_samplelight.h"
+#include "zcl_EnergyHarvester.h"
 
 #include "onboard.h"
 
@@ -80,7 +80,7 @@
 /*********************************************************************
  * GLOBAL VARIABLES
  */
-byte zclSampleLight_TaskID;
+byte zclEnergyHarvester_TaskID;
 
 /*********************************************************************
  * GLOBAL FUNCTIONS
@@ -102,7 +102,7 @@ static cId_t bindingInClusters[ZCLSAMPLELIGHT_BINDINGLIST] =
 static endPointDesc_t sampleLight_TestEp =
 {
   20,                                 // Test endpoint
-  &zclSampleLight_TaskID,
+  &zclEnergyHarvester_TaskID,
   (SimpleDescriptionFormat_t *)NULL,  // No Simple description for this test endpoint
   (afNetworkLatencyReq_t)0            // No Network Latency req
 };
@@ -156,18 +156,9 @@ static zclGeneral_AppCallbacks_t zclSampleLight_CmdCallbacks =
   NULL                                    // RSSI Location Response command
 };
 
-/*********************************************************************
- * @fn          zclSampleLight_Init
- *
- * @brief       Initialization function for the zclGeneral layer.
- *
- * @param       none
- *
- * @return      none
- */
-void zclSampleLight_Init( byte task_id )
+void zclEnergyHarvester_Init( byte task_id )
 {
-  zclSampleLight_TaskID = task_id;
+  zclEnergyHarvester_TaskID = task_id;
 
   // Set destination address to indirect
   //zclSampleLight_DstAddr.addrMode = (afAddrMode_t)AddrNotPresent;
@@ -184,25 +175,16 @@ void zclSampleLight_Init( byte task_id )
   zcl_registerAttrList( SAMPLELIGHT_ENDPOINT, SAMPLELIGHT_MAX_ATTRIBUTES, zclSampleLight_Attrs );
 
   // Register the Application to receive the unprocessed Foundation command/response messages
-  zcl_registerForMsg( zclSampleLight_TaskID );
+  zcl_registerForMsg( zclEnergyHarvester_TaskID );
   
   // Register for all key events - This app will handle all key events
-  RegisterForKeys( zclSampleLight_TaskID );
+  RegisterForKeys( zclEnergyHarvester_TaskID );
 
   // Register for a test endpoint
   afRegister( &sampleLight_TestEp );
 }
 
-/*********************************************************************
- * @fn          zclSample_event_loop
- *
- * @brief       Event Loop Processor for zclGeneral.
- *
- * @param       none
- *
- * @return      none
- */
-uint16 zclSampleLight_event_loop( uint8 task_id, uint16 events )
+uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
 {
   afIncomingMSGPacket_t *MSGpkt;
   
@@ -210,7 +192,7 @@ uint16 zclSampleLight_event_loop( uint8 task_id, uint16 events )
 
   if ( events & SYS_EVENT_MSG )
   {
-    while ( (MSGpkt = (afIncomingMSGPacket_t *)osal_msg_receive( zclSampleLight_TaskID )) )
+    while ( (MSGpkt = (afIncomingMSGPacket_t *)osal_msg_receive( zclEnergyHarvester_TaskID )) )
     {
       switch ( MSGpkt->hdr.event )
       {
@@ -304,7 +286,7 @@ static void zclSampleLight_ProcessIdentifyTimeChange( void )
 {
   if ( zclSampleLight_IdentifyTime > 0 )
   {
-    osal_start_timerEx( zclSampleLight_TaskID, SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT, 1000 );
+    osal_start_timerEx( zclEnergyHarvester_TaskID, SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT, 1000 );
     HalLedBlink ( HAL_LED_4, 0xFF, HAL_LED_DEFAULT_DUTY_CYCLE, HAL_LED_DEFAULT_FLASH_TIME );
   }
   else
@@ -313,7 +295,7 @@ static void zclSampleLight_ProcessIdentifyTimeChange( void )
       HalLedSet ( HAL_LED_4, HAL_LED_MODE_ON );
     else
       HalLedSet ( HAL_LED_4, HAL_LED_MODE_OFF );
-    osal_stop_timerEx( zclSampleLight_TaskID, SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT );
+    osal_stop_timerEx( zclEnergyHarvester_TaskID, SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT );
   }
 }
 

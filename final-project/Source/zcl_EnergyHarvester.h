@@ -85,16 +85,8 @@ extern uint16 zclSampleLight_IdentifyTime;
 /*********************************************************************
  * FUNCTIONS
  */
-
- /*
-  * Initialization for the task
-  */
-extern void zclSampleLight_Init( byte task_id );
-
-/*
- *  Event Process for the task
- */
-extern UINT16 zclSampleLight_event_loop( byte task_id, UINT16 events );
+extern void zclEnergyHarvester_Init( byte task_id );
+extern UINT16 zclEnergyHarvester_event_loop( byte task_id, UINT16 events );
 
 
 /*********************************************************************
