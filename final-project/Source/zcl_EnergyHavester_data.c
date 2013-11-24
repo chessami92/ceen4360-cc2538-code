@@ -1,10 +1,5 @@
 /**************************************************************************************************
-  Filename:       zcl_samplelight_data.c
-  Revised:        $Date: 2008-03-11 11:01:35 -0700 (Tue, 11 Mar 2008) $
-  Revision:       $Revision: 16570 $
-
-
-  Description:    Zigbee Cluster Library - sample device application.
+  Description:    Zigbee Cluster Library - energy harvesting device.
 
 
   Copyright 2006-2007 Texas Instruments Incorporated. All rights reserved.

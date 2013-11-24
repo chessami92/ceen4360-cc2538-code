@@ -1,7 +1,6 @@
 /**************************************************************************************************
-  Filename:       OSAL_EnergyHarvester.c
-
   Description:    Main setup for the Operating System Abstraction Layer
+
 
   Copyright 2006-2007 Texas Instruments Incorporated. All rights reserved.
 
