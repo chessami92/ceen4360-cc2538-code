@@ -49,7 +49,7 @@ extern "C"
 /*********************************************************************
  * CONSTANTS
  */
-#define SAMPLELIGHT_ENDPOINT            13
+#define ENDPOINT 13
 
 #define SAMPLELIGHT_MAX_ATTRIBUTES      12
 
@@ -71,7 +71,7 @@ extern "C"
  */
 extern SimpleDescriptionFormat_t zclSampleLight_SimpleDesc;
 
-extern CONST zclAttrRec_t zclSampleLight_Attrs[];
+extern CONST zclAttrRec_t zcl_Attrs[];
 
 extern uint8  zclSampleLight_OnOff;
 

@@ -90,7 +90,7 @@ uint8  zclSampleLight_OnOff = LIGHT_OFF;
 /*********************************************************************
  * ATTRIBUTE DEFINITIONS - Uses REAL cluster IDs
  */
-CONST zclAttrRec_t zclSampleLight_Attrs[SAMPLELIGHT_MAX_ATTRIBUTES] =
+CONST zclAttrRec_t zcl_Attrs[SAMPLELIGHT_MAX_ATTRIBUTES] =
 {
   // *** General Basic Cluster Attributes ***
   {
@@ -221,7 +221,7 @@ const cId_t zclSampleLight_OutClusterList[ZCLSAMPLELIGHT_MAX_OUTCLUSTERS] =
 
 SimpleDescriptionFormat_t zclSampleLight_SimpleDesc =
 {
-  SAMPLELIGHT_ENDPOINT,                  //  int Endpoint;
+  ENDPOINT,                              //  int Endpoint;
   ZCL_HA_PROFILE_ID,                     //  uint16 AppProfId[2];
   ZCL_HA_DEVICEID_DIMMABLE_LIGHT,        //  uint16 AppDeviceId[2];
   SAMPLELIGHT_DEVICE_VERSION,            //  int   AppDevVer:4;

@@ -34,18 +34,13 @@
 **************************************************************************************************/
 
 /*********************************************************************
-  This device will be like a Light device.  This application is not
-  intended to be a Light device, but will use the device description
-  to implement this sample code.
-*********************************************************************/
-
-/*********************************************************************
  * INCLUDES
  */
 #include "ZComDef.h"
 #include "OSAL.h"
 #include "AF.h"
 #include "ZDApp.h"
+#include "ZDObject.h"
 
 #include "zcl.h"
 #include "zcl_general.h"
@@ -53,12 +48,10 @@
 
 #include "zcl_EnergyHarvester.h"
 
-#include "onboard.h"
-
 /* HAL */
-#include "hal_lcd.h"
 #include "hal_led.h"
-#include "hal_key.h"
+
+#include "DebugTrace.h"
 
 
 /*********************************************************************
@@ -68,6 +61,10 @@
 /*********************************************************************
  * CONSTANTS
  */
+#define COORDINATOR 0
+#define ROUTER 1
+#define END_DEVICE 2
+
 /*********************************************************************
  * TYPEDEFS
  */
@@ -86,8 +83,8 @@ byte zclEnergyHarvester_TaskID;
  */
 //static afAddrType_t zclSampleLight_DstAddr;
 
-#define ZCLSAMPLELIGHT_BINDINGLIST       2
-static cId_t bindingInClusters[ZCLSAMPLELIGHT_BINDINGLIST] =
+#define ZCL_BINDINGLIST       2
+static cId_t bindingInClusters[ZCL_BINDINGLIST] =
 {
   ZCL_CLUSTER_ID_GEN_ON_OFF,
   ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL
@@ -105,11 +102,13 @@ static endPointDesc_t sampleLight_TestEp =
 /*********************************************************************
  * LOCAL FUNCTIONS
  */
-static void zclSampleLight_HandleKeys( byte shift, byte keys );
-static void zclSampleLight_BasicResetCB( void );
-static void zclSampleLight_IdentifyCB( zclIdentify_t *pCmd );
-static void zclSampleLight_IdentifyQueryRspCB( zclIdentifyQueryRsp_t *pRsp );
-static void zclSampleLight_OnOffCB( uint8 cmd );
+static void zcl_ProcessZdoStateChange(osal_event_hdr_t *pMsg);
+static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg );
+static void zcl_SendBindRequest( void );
+static void zcl_BasicResetCB( void );
+static void zcl_IdentifyCB( zclIdentify_t *pCmd );
+static void zcl_IdentifyQueryRspCB( zclIdentifyQueryRsp_t *pRsp );
+static void zcl_OnOffCB( uint8 cmd );
 static void zclSampleLight_ProcessIdentifyTimeChange( void );
 
 // Functions to process ZCL Foundation incoming Command/Response messages 
@@ -130,11 +129,11 @@ static uint8 zclSampleLight_ProcessInDiscRspCmd( zclIncomingMsg_t *pInMsg );
  */
 static zclGeneral_AppCallbacks_t zclSampleLight_CmdCallbacks =
 {
-  zclSampleLight_BasicResetCB,            // Basic Cluster Reset command
-  zclSampleLight_IdentifyCB,              // Identify command
+  zcl_BasicResetCB,                       // Basic Cluster Reset command
+  zcl_IdentifyCB,                         // Identify command
   NULL,                                   // Identify Trigger Effect command
-  zclSampleLight_IdentifyQueryRspCB,      // Identify Query Response command
-  zclSampleLight_OnOffCB,                 // On/Off cluster commands
+  zcl_IdentifyQueryRspCB,                 // Identify Query Response command
+  zcl_OnOffCB,                            // On/Off cluster commands
   NULL,                                   // On/Off cluster enhanced command Off with Effect
   NULL,                                   // On/Off cluster enhanced command On with Recall Global Scene
   NULL,                                   // On/Off cluster enhanced command On with Timed Off
@@ -164,19 +163,18 @@ void zclEnergyHarvester_Init( byte task_id )
   zclHA_Init( &zclSampleLight_SimpleDesc );
   
   // Register the ZCL General Cluster Library callback functions
-  zclGeneral_RegisterCmdCallbacks( SAMPLELIGHT_ENDPOINT, &zclSampleLight_CmdCallbacks );
+  zclGeneral_RegisterCmdCallbacks( ENDPOINT, &zclSampleLight_CmdCallbacks );
 
   // Register the application's attribute list
-  zcl_registerAttrList( SAMPLELIGHT_ENDPOINT, SAMPLELIGHT_MAX_ATTRIBUTES, zclSampleLight_Attrs );
+  zcl_registerAttrList( ENDPOINT, SAMPLELIGHT_MAX_ATTRIBUTES, zcl_Attrs );
 
   // Register the Application to receive the unprocessed Foundation command/response messages
-  zcl_registerForMsg( zclEnergyHarvester_TaskID );
-  
-  // Register for all key events - This app will handle all key events
-  RegisterForKeys( zclEnergyHarvester_TaskID );
+  //zcl_registerForMsg( zclEnergyHarvester_TaskID );
 
   // Register for a test endpoint
   afRegister( &sampleLight_TestEp );
+  
+  ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, End_Device_Bind_rsp );
 }
 
 uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
@@ -195,9 +193,13 @@ uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
           // Incoming ZCL Foundation command/response messages
           zclSampleLight_ProcessIncomingMsg( (zclIncomingMsg_t *)MSGpkt );
           break;
+ 
+        case ZDO_STATE_CHANGE:
+          zcl_ProcessZdoStateChange( ( osal_event_hdr_t * )MSGpkt );
+          break;
           
-        case KEY_CHANGE:
-          zclSampleLight_HandleKeys( ((keyChange_t *)MSGpkt)->state, ((keyChange_t *)MSGpkt)->keys );
+        case ZDO_CB_MSG:
+          zcl_ProcessZDOMsgs( (zdoIncomingMsg_t *)MSGpkt );
           break;
 
         default:
@@ -226,47 +228,90 @@ uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
 }
 
 /*********************************************************************
- * @fn      zclSampleLight_HandleKeys
+ * @fn      zcl_ProcessZdoStateChange
  *
- * @brief   Handles all key events for this device.
+ * @brief   Handles state change OSAL message from ZDO.
  *
- * @param   shift - true if in shift/alt.
- * @param   keys - bit field for key events. Valid entries:
- *                 HAL_KEY_SW_4
- *                 HAL_KEY_SW_3
- *                 HAL_KEY_SW_2
- *                 HAL_KEY_SW_1
+ * @param   pMsg - Message data
  *
  * @return  none
  */
-static void zclSampleLight_HandleKeys( byte shift, byte keys )
-{
-  zAddrType_t dstAddr;
-  
-  (void)shift;  // Intentionally unreferenced parameter
-
-  if ( keys & HAL_KEY_SW_2 )
-  {
-    // Initiate an End Device Bind Request, this bind request will
-    // only use a cluster list that is important to binding.
-    dstAddr.addrMode = afAddr16Bit;
-    dstAddr.addr.shortAddr = 0;   // Coordinator makes the match
-    ZDP_EndDeviceBindReq( &dstAddr, NLME_GetShortAddr(),
-                           SAMPLELIGHT_ENDPOINT,
-                           ZCL_HA_PROFILE_ID,
-                           ZCLSAMPLELIGHT_BINDINGLIST, bindingInClusters,
-                           0, NULL,   // No Outgoing clusters to bind
-                           TRUE );
-  }
-
-  if ( keys & HAL_KEY_SW_3 )
-  {
-  }
-
-  if ( keys & HAL_KEY_SW_4 )
-  {
+static void zcl_ProcessZdoStateChange(osal_event_hdr_t *pMsg) {
+  switch( ( devStates_t )pMsg->status ) {
+    case DEV_ZB_COORD: case DEV_ROUTER: case DEV_END_DEVICE:
+#if DEV_TYPE == COORDINATOR
+      debug_str( "Successfully started network." );
+#else
+      debug_str( "Successfully connected to network." );
+#endif
+      zcl_SendBindRequest();
+      break;
+      
+    case DEV_NWK_ORPHAN:
+      debug_str( "Lost information about parent." );
+      break;
   }
 }
+
+/*********************************************************************
+ * @fn      zcl_ProcessZDOMsgs
+ *
+ * @brief   Process response messages.
+ *
+ * @param   inMsg - ZDO response message.
+ *
+ * @return  none
+ */
+static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
+  uint8 response;
+  
+  if( inMsg->clusterID == End_Device_Bind_rsp ) {
+    response = ZDO_ParseBindRsp( inMsg );
+    if ( response == ZSuccess ) {
+      debug_str( "Bind succeeded." );
+#if DEV_TYPE == COORDINATOR
+      // Try to bind another device immediately.
+      zcl_SendBindRequest();
+#endif
+    } else {
+      debug_str( "Bind failed; trying again." );
+      zcl_SendBindRequest();
+    }
+  }
+}
+
+/*********************************************************************
+ * @fn      zcl_SendBindRequest
+ *
+ * @brief   Send the appropriate bind request based on DEV_TYPE.
+ *
+ * @param   none
+ *
+ * @return  none
+ */
+static void zcl_SendBindRequest( void ) {
+  zAddrType_t dstAddr;
+  
+  dstAddr.addrMode = afAddr16Bit;
+  dstAddr.addr.shortAddr = 0;   // Coordinator makes the match
+
+#if DEV_TYPE == COORDINATOR
+  ZDP_EndDeviceBindReq( &dstAddr, NLME_GetShortAddr(),
+    ENDPOINT,
+    ZCL_HA_PROFILE_ID,
+    ZCL_BINDINGLIST, bindingInClusters,
+    0, NULL,   // No Outgoing clusters to bind
+    TRUE );
+#else
+  ZDP_EndDeviceBindReq( &dstAddr, NLME_GetShortAddr(),
+    ENDPOINT,
+    ZCL_HA_PROFILE_ID,
+    0, NULL,   // No incoming clusters to bind
+    ZCL_BINDINGLIST, bindingInClusters,
+    TRUE );
+#endif
+}
+
 
 /*********************************************************************
  * @fn      zclSampleLight_ProcessIdentifyTimeChange
@@ -295,7 +340,7 @@ static void zclSampleLight_ProcessIdentifyTimeChange( void )
 }
 
 /*********************************************************************
- * @fn      zclSampleLight_BasicResetCB
+ * @fn      zcl_BasicResetCB
  *
  * @brief   Callback from the ZCL General Cluster Library
  *          to set all the Basic Cluster attributes to default values.
@@ -304,13 +349,13 @@ static void zclSampleLight_ProcessIdentifyTimeChange( void )
  *
  * @return  none
  */
-static void zclSampleLight_BasicResetCB( void )
+static void zcl_BasicResetCB( void )
 {
   // Reset all attributes to default values
 }
 
 /*********************************************************************
- * @fn      zclSampleLight_IdentifyCB
+ * @fn      zcl_IdentifyCB
  *
  * @brief   Callback from the ZCL General Cluster Library when
  *          it received an Identity Command for this application.
@@ -320,14 +365,14 @@ static void zclSampleLight_BasicResetCB( void )
  *
  * @return  none
  */
-static void zclSampleLight_IdentifyCB( zclIdentify_t *pCmd )
+static void zcl_IdentifyCB( zclIdentify_t *pCmd )
 {
   zclSampleLight_IdentifyTime = pCmd->identifyTime;
   zclSampleLight_ProcessIdentifyTimeChange();
 }
 
 /*********************************************************************
- * @fn      zclSampleLight_IdentifyQueryRspCB
+ * @fn      zcl_IdentifyQueryRspCB
  *
  * @brief   Callback from the ZCL General Cluster Library when
  *          it received an Identity Query Response Command for this application.
@@ -337,14 +382,14 @@ static void zclSampleLight_IdentifyCB( zclIdentify_t *pCmd )
  *
  * @return  none
  */
-static void zclSampleLight_IdentifyQueryRspCB(  zclIdentifyQueryRsp_t *pRsp )
+static void zcl_IdentifyQueryRspCB(  zclIdentifyQueryRsp_t *pRsp )
 {
   // Query Response (with timeout value)
   (void)pRsp;
 }
 
 /*********************************************************************
- * @fn      zclSampleLight_OnOffCB
+ * @fn      zcl_OnOffCB
  *
  * @brief   Callback from the ZCL General Cluster Library when
  *          it received an On/Off Command for this application.
@@ -353,7 +398,7 @@ static void zclSampleLight_IdentifyQueryRspCB(  zclIdentifyQueryRsp_t *pRsp )
  *
  * @return  none
  */
-static void zclSampleLight_OnOffCB( uint8 cmd )
+static void zcl_OnOffCB( uint8 cmd )
 {
   // Turn on the light
   if ( cmd == COMMAND_ON )
