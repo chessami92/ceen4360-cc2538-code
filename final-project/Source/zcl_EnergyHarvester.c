@@ -305,28 +305,17 @@ static void zcl_SendBindRequest( void ) {
  */
 static void zcl_SendDeviceData( void ) {  
   afAddrType_t dstAddr;
+  ZStatus_t response;
   
-  zcl_SendCommand( ENDPOINT, &dstAddr,
+  response = zcl_SendCommand( ENDPOINT, &dstAddr,
     ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT, COMMAND_OFF,
     TRUE, ZCL_FRAME_CLIENT_SERVER_DIR,
     FALSE, 0, 0,
     11, "Hello World" );
   
-  /*zclWriteRec_t zcl_WriteRec = {0, ZCL_DATATYPE_CHAR_STR, "\x04Test"};
-  zclWriteCmd_t *zcl_WriteCmd = ( zclWriteCmd_t * )osal_mem_alloc( sizeof ( zclWriteCmd_t ) + 1 * sizeof( zclWriteRec_t ) );;
-  zcl_WriteCmd->numAttr = 1;
-  zcl_WriteCmd->attrList[0] = zcl_WriteRec;
-  
-  ZStatus_t response;
-  response = zcl_SendWrite( ENDPOINT, &dstAddr, 
-    ZCL_CLUSTER_ID_SE_SIMPLE_METERING, zcl_WriteCmd, 
-    0, TRUE, 
-    0 );
   if( response == ZSuccess ) {
-    debug_str( "Successfully Sent Message." );
+    debug_str( "Successfully sent message." );
   }
-  
-  osal_mem_free( zcl_WriteCmd );*/
 }
 #endif
 
