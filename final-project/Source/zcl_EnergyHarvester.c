@@ -108,10 +108,6 @@ static void zcl_SendBindRequest( void );
 #if DEV_TYPE != COORDINATOR
 static void zcl_SendDeviceData( void );
 #endif
-static void zcl_BasicResetCB( void );
-static void zcl_IdentifyCB( zclIdentify_t *pCmd );
-static void zcl_IdentifyQueryRspCB( zclIdentifyQueryRsp_t *pRsp );
-static void zcl_OnOffCB( uint8 cmd );
 static void zclSampleLight_ProcessIdentifyTimeChange( void );
 
 // Functions to process ZCL Foundation incoming Command/Response messages 
@@ -132,11 +128,11 @@ static uint8 zclSampleLight_ProcessInDiscRspCmd( zclIncomingMsg_t *pInMsg );
  */
 static zclGeneral_AppCallbacks_t zclSampleLight_CmdCallbacks =
 {
-  zcl_BasicResetCB,                       // Basic Cluster Reset command
-  zcl_IdentifyCB,                         // Identify command
+  NULL,                                   // Basic Cluster Reset command
+  NULL,                                   // Identify command
   NULL,                                   // Identify Trigger Effect command
-  zcl_IdentifyQueryRspCB,                 // Identify Query Response command
-  zcl_OnOffCB,                            // On/Off cluster commands
+  NULL,                                   // Identify Query Response command
+  NULL,                                   // On/Off cluster commands
   NULL,                                   // On/Off cluster enhanced command Off with Effect
   NULL,                                   // On/Off cluster enhanced command On with Recall Global Scene
   NULL,                                   // On/Off cluster enhanced command On with Timed Off
@@ -423,92 +419,6 @@ static void zclSampleLight_ProcessIdentifyTimeChange( void )
     osal_stop_timerEx( zclEnergyHarvester_TaskID, SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT );
   }
 }
-
-/*********************************************************************
- * @fn      zcl_BasicResetCB
- *
- * @brief   Callback from the ZCL General Cluster Library
- *          to set all the Basic Cluster attributes to default values.
- *
- * @param   none
- *
- * @return  none
- */
-static void zcl_BasicResetCB( void )
-{
-  // Reset all attributes to default values
-}
-
-/*********************************************************************
- * @fn      zcl_IdentifyCB
- *
- * @brief   Callback from the ZCL General Cluster Library when
- *          it received an Identity Command for this application.
- *
- * @param   srcAddr - source address and endpoint of the response message
- * @param   identifyTime - the number of seconds to identify yourself
- *
- * @return  none
- */
-static void zcl_IdentifyCB( zclIdentify_t *pCmd )
-{
-  zclSampleLight_IdentifyTime = pCmd->identifyTime;
-  zclSampleLight_ProcessIdentifyTimeChange();
-}
-
-/*********************************************************************
- * @fn      zcl_IdentifyQueryRspCB
- *
- * @brief   Callback from the ZCL General Cluster Library when
- *          it received an Identity Query Response Command for this application.
- *
- * @param   srcAddr - requestor's address
- * @param   timeout - number of seconds to identify yourself (valid for query response)
- *
- * @return  none
- */
-static void zcl_IdentifyQueryRspCB(  zclIdentifyQueryRsp_t *pRsp )
-{
-  // Query Response (with timeout value)
-  (void)pRsp;
-}
-
-/*********************************************************************
- * @fn      zcl_OnOffCB
- *
- * @brief   Callback from the ZCL General Cluster Library when
- *          it received an On/Off Command for this application.
- *
- * @param   cmd - COMMAND_ON, COMMAND_OFF or COMMAND_TOGGLE
- *
- * @return  none
- */
-static void zcl_OnOffCB( uint8 cmd )
-{
-  // Turn on the light
-  if ( cmd == COMMAND_ON )
-    zclSampleLight_OnOff = LIGHT_ON;
-
-  // Turn off the light
-  else if ( cmd == COMMAND_OFF )
-    zclSampleLight_OnOff = LIGHT_OFF;
-
-  // Toggle the light
-  else
-  {
-    if ( zclSampleLight_OnOff == LIGHT_OFF )
-      zclSampleLight_OnOff = LIGHT_ON;
-    else
-      zclSampleLight_OnOff = LIGHT_OFF;
-  }
-
-  // In this sample app, we use LED4 to simulate the Light
-  if ( zclSampleLight_OnOff == LIGHT_ON )
-    HalLedSet( HAL_LED_4, HAL_LED_MODE_ON );
-  else
-    HalLedSet( HAL_LED_4, HAL_LED_MODE_OFF );
-}
-
 
 /****************************************************************************** 
  * 

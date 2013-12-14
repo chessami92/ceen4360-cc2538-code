@@ -106,6 +106,7 @@ extern "C"
 #define ZCL_CLUSTER_ID_MS_FLOW_MEASUREMENT                   0x0404
 #define ZCL_CLUSTER_ID_MS_RELATIVE_HUMIDITY                  0x0405
 #define ZCL_CLUSTER_ID_MS_OCCUPANCY_SENSING                  0x0406
+#define ZCL_CLUSTER_ID_MS_ALL                                0x0407
 
 // Security and Safety (SS) Clusters
 #define ZCL_CLUSTER_ID_SS_IAS_ZONE                           0x0500
