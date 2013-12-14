@@ -233,7 +233,9 @@ static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
  */
 static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg ) {
   ZStatus_t stat = ZSuccess;
-
+  
+  debug_str( pInMsg->pData );
+  
   if ( zcl_ClusterCmd( pInMsg->hdr.fc.type ) )
   {
     
@@ -303,12 +305,12 @@ static void zcl_SendBindRequest( void ) {
  */
 static void zcl_SendDeviceData( void ) {  
   afAddrType_t dstAddr;
-  zcl_SendCommand( ENDPOINT, &dstAddr, ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT, COMMAND_TOGGLE, TRUE, ZCL_FRAME_CLIENT_SERVER_DIR, FALSE, 0, 0, 0, NULL );
   
-  /*zcl_SendCommand( ENDPOINT, &dstAddr,
+  zcl_SendCommand( ENDPOINT, &dstAddr,
     ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT, COMMAND_OFF,
     TRUE, ZCL_FRAME_CLIENT_SERVER_DIR,
-    FALSE, 0, 0, 0, NULL );*/
+    FALSE, 0, 0,
+    11, "Hello World" );
   
   /*zclWriteRec_t zcl_WriteRec = {0, ZCL_DATATYPE_CHAR_STR, "\x04Test"};
   zclWriteCmd_t *zcl_WriteCmd = ( zclWriteCmd_t * )osal_mem_alloc( sizeof ( zclWriteCmd_t ) + 1 * sizeof( zclWriteRec_t ) );;
