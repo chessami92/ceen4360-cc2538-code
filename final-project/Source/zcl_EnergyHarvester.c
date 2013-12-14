@@ -81,13 +81,12 @@ byte zclEnergyHarvester_TaskID;
 /*********************************************************************
  * LOCAL VARIABLES
  */
-//static afAddrType_t zclSampleLight_DstAddr;
 
 #define ZCL_BINDINGLIST       2
 static cId_t bindingInClusters[ZCL_BINDINGLIST] =
 {
   ZCL_CLUSTER_ID_GEN_ON_OFF,
-  ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL
+  ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT
 };
 
 // Test Endpoint to allow SYS_APP_MSGs
@@ -102,9 +101,13 @@ static endPointDesc_t sampleLight_TestEp =
 /*********************************************************************
  * LOCAL FUNCTIONS
  */
-static void zcl_ProcessZdoStateChange(osal_event_hdr_t *pMsg);
+static void zcl_ProcessZdoStateChange( osal_event_hdr_t *pMsg );
 static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg );
+static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg );
 static void zcl_SendBindRequest( void );
+#if DEV_TYPE != COORDINATOR
+static void zcl_SendDeviceData( void );
+#endif
 static void zcl_BasicResetCB( void );
 static void zcl_IdentifyCB( zclIdentify_t *pCmd );
 static void zcl_IdentifyQueryRspCB( zclIdentifyQueryRsp_t *pRsp );
@@ -154,11 +157,6 @@ void zclEnergyHarvester_Init( byte task_id )
 {
   zclEnergyHarvester_TaskID = task_id;
 
-  // Set destination address to indirect
-  //zclSampleLight_DstAddr.addrMode = (afAddrMode_t)AddrNotPresent;
-  //zclSampleLight_DstAddr.endPoint = 0;
-  //zclSampleLight_DstAddr.addr.shortAddr = 0;
-
   // This app is part of the Home Automation Profile
   zclHA_Init( &zclSampleLight_SimpleDesc );
   
@@ -174,24 +172,28 @@ void zclEnergyHarvester_Init( byte task_id )
   // Register for a test endpoint
   afRegister( &sampleLight_TestEp );
   
+  zcl_registerPlugin( ZCL_CLUSTER_ID_MS_ILLUMINANCE_MEASUREMENT,
+    ZCL_CLUSTER_ID_MS_OCCUPANCY_SENSING,
+    zclEnergyHarvester_HdlIncoming );
+  
   ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, End_Device_Bind_rsp );
+#if DEV_TYPE == COORDINATOR
+  ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT );
+#endif
 }
 
 uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
 {
   afIncomingMSGPacket_t *MSGpkt;
   
-  (void)task_id;  // Intentionally unreferenced parameter
+  ( void )task_id;  // Intentionally unreferenced parameter
 
-  if ( events & SYS_EVENT_MSG )
-  {
-    while ( (MSGpkt = (afIncomingMSGPacket_t *)osal_msg_receive( zclEnergyHarvester_TaskID )) )
-    {
-      switch ( MSGpkt->hdr.event )
-      {
+  if ( events & SYS_EVENT_MSG ) {
+    while ( (MSGpkt = (afIncomingMSGPacket_t *)osal_msg_receive( zclEnergyHarvester_TaskID )) ) {
+      switch ( MSGpkt->hdr.event ) {
         case ZCL_INCOMING_MSG:
           // Incoming ZCL Foundation command/response messages
-          zclSampleLight_ProcessIncomingMsg( (zclIncomingMsg_t *)MSGpkt );
+          zclSampleLight_ProcessIncomingMsg( ( zclIncomingMsg_t * )MSGpkt );
           break;
  
         case ZDO_STATE_CHANGE:
@@ -199,10 +201,7 @@ uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
           break;
           
         case ZDO_CB_MSG:
-          zcl_ProcessZDOMsgs( (zdoIncomingMsg_t *)MSGpkt );
-          break;
-
-        default:
+          zcl_ProcessZDOMsgs( ( zdoIncomingMsg_t * )MSGpkt );
           break;
       }
 
@@ -214,10 +213,10 @@ uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
     return (events ^ SYS_EVENT_MSG);
   }
 
-  if ( events & SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT )
-  {
-    if ( zclSampleLight_IdentifyTime > 0 )
+  if ( events & SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT ) {
+    if ( zclSampleLight_IdentifyTime > 0 ) {
       zclSampleLight_IdentifyTime--;
+    }
     zclSampleLight_ProcessIdentifyTimeChange();
 
     return ( events ^ SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT );
@@ -265,19 +264,69 @@ static void zcl_ProcessZdoStateChange(osal_event_hdr_t *pMsg) {
 static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
   uint8 response;
   
-  if( inMsg->clusterID == End_Device_Bind_rsp ) {
-    response = ZDO_ParseBindRsp( inMsg );
-    if ( response == ZSuccess ) {
-      debug_str( "Bind succeeded." );
+  switch( inMsg->clusterID ) {
+    case End_Device_Bind_rsp:
+      response = ZDO_ParseBindRsp( inMsg );
+      if ( response == ZSuccess ) {
+        debug_str( "Bind succeeded." );
 #if DEV_TYPE == COORDINATOR
-      // Try to bind another device immediately.
-      zcl_SendBindRequest();
+        // Try to bind another device immediately.
+        zcl_SendBindRequest();
+#else
+        zcl_SendDeviceData();
 #endif
-    } else {
-      debug_str( "Bind failed; trying again." );
-      zcl_SendBindRequest();
-    }
+      } else {
+        debug_str( "Bind failed; trying again." );
+        zcl_SendBindRequest();
+      }
+      break;
+    
+#if DEV_TYPE == COORDINATOR
+    case ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT:
+      debug_str( "Got a 'Sensor Response.' Whatever we decide that to be" );
+      HalLedSet( HAL_LED_4, HAL_LED_MODE_TOGGLE );
+      break;
+#endif
   }
+}
+
+/*********************************************************************
+ * @fn      zclEnergyHarvester_HdlIncoming
+ *
+ * @brief   Callback from ZCL to process incoming Commands specific
+ *          to this cluster library or Profile commands for attributes
+ *          that aren't in the attribute list
+ *
+ * @param   pInMsg - pointer to the incoming message
+ *
+ * @return  ZStatus_t
+ */
+static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg ) {
+  ZStatus_t stat = ZSuccess;
+
+  if ( zcl_ClusterCmd( pInMsg->hdr.fc.type ) )
+  {
+    
+    stat = ZFailure;
+    
+    /*// Is this a manufacturer specific command?
+    if ( pInMsg->hdr.fc.manuSpecific == 0 )
+    {
+      stat = zclGeneral_HdlInSpecificCommands( pInMsg );
+    }
+    else
+    {
+      // We don't support any manufacturer specific command.
+      stat = ZFailure;
+    }*/
+  }
+  else
+  {
+    // Handle all the normal (Read, Write...) commands -- should never get here
+    stat = ZFailure;
+  }
+  
+  return ( stat );
 }
 
 /*********************************************************************
@@ -312,6 +361,42 @@ static void zcl_SendBindRequest( void ) {
 #endif
 }
 
+#if DEV_TYPE != COORDINATOR
+/*********************************************************************
+ * @fn      zcl_SendDeviceData
+ *
+ * @brief   Process sensor send data to coordinator.
+ *
+ * @param   none
+ *
+ * @return  none
+ */
+static void zcl_SendDeviceData( void ) {  
+  afAddrType_t dstAddr;
+  zcl_SendCommand( ENDPOINT, &dstAddr, ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT, COMMAND_TOGGLE, TRUE, ZCL_FRAME_CLIENT_SERVER_DIR, FALSE, 0, 0, 0, NULL );
+  
+  /*zcl_SendCommand( ENDPOINT, &dstAddr,
+    ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT, COMMAND_OFF,
+    TRUE, ZCL_FRAME_CLIENT_SERVER_DIR,
+    FALSE, 0, 0, 0, NULL );*/
+  
+  /*zclWriteRec_t zcl_WriteRec = {0, ZCL_DATATYPE_CHAR_STR, "\x04Test"};
+  zclWriteCmd_t *zcl_WriteCmd = ( zclWriteCmd_t * )osal_mem_alloc( sizeof ( zclWriteCmd_t ) + 1 * sizeof( zclWriteRec_t ) );;
+  zcl_WriteCmd->numAttr = 1;
+  zcl_WriteCmd->attrList[0] = zcl_WriteRec;
+  
+  ZStatus_t response;
+  response = zcl_SendWrite( ENDPOINT, &dstAddr, 
+    ZCL_CLUSTER_ID_SE_SIMPLE_METERING, zcl_WriteCmd, 
+    0, TRUE, 
+    0 );
+  if( response == ZSuccess ) {
+    debug_str( "Successfully Sent Message." );
+  }
+  
+  osal_mem_free( zcl_WriteCmd );*/
+}
+#endif
 
 /*********************************************************************
  * @fn      zclSampleLight_ProcessIdentifyTimeChange

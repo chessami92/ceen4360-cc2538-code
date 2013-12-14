@@ -196,6 +196,17 @@ CONST zclAttrRec_t zcl_Attrs[SAMPLELIGHT_MAX_ATTRIBUTES] =
       (void *)&zclSampleLight_OnOff
     }
   },
+  
+  // *** Metering Attributes ***
+  {
+    ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT,
+    { // Attribute record
+      ATTRID_ON_OFF,
+      ZCL_DATATYPE_UINT8,
+      ACCESS_CONTROL_READ,
+      (void *)&zclSampleLight_OnOff
+    }
+  },
 };
 
 /*********************************************************************
@@ -203,14 +214,15 @@ CONST zclAttrRec_t zcl_Attrs[SAMPLELIGHT_MAX_ATTRIBUTES] =
  */
 // This is the Cluster ID List and should be filled with Application
 // specific cluster IDs.
-#define ZCLSAMPLELIGHT_MAX_INCLUSTERS       5
+#define ZCLSAMPLELIGHT_MAX_INCLUSTERS       6
 const cId_t zclSampleLight_InClusterList[ZCLSAMPLELIGHT_MAX_INCLUSTERS] =
 {
   ZCL_CLUSTER_ID_GEN_BASIC,
   ZCL_CLUSTER_ID_GEN_SCENES,
   ZCL_CLUSTER_ID_GEN_GROUPS,
   ZCL_CLUSTER_ID_GEN_ON_OFF,
-  ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL
+  ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL,
+  ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT
 };
 
 #define ZCLSAMPLELIGHT_MAX_OUTCLUSTERS       1
