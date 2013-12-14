@@ -90,8 +90,7 @@ static cId_t bindingInClusters[ZCL_BINDINGLIST] =
 };
 
 // Test Endpoint to allow SYS_APP_MSGs
-static endPointDesc_t sampleLight_TestEp =
-{
+static endPointDesc_t testEp = {
   20,                                 // Test endpoint
   &zclEnergyHarvester_TaskID,
   (SimpleDescriptionFormat_t *)NULL,  // No Simple description for this test endpoint
@@ -110,63 +109,14 @@ static void zcl_SendDeviceData( void );
 #endif
 static void zclSampleLight_ProcessIdentifyTimeChange( void );
 
-// Functions to process ZCL Foundation incoming Command/Response messages 
-static void zclSampleLight_ProcessIncomingMsg( zclIncomingMsg_t *msg );
-#ifdef ZCL_READ
-static uint8 zclSampleLight_ProcessInReadRspCmd( zclIncomingMsg_t *pInMsg );
-#endif
-#ifdef ZCL_WRITE
-static uint8 zclSampleLight_ProcessInWriteRspCmd( zclIncomingMsg_t *pInMsg );
-#endif
-static uint8 zclSampleLight_ProcessInDefaultRspCmd( zclIncomingMsg_t *pInMsg );
-#ifdef ZCL_DISCOVER
-static uint8 zclSampleLight_ProcessInDiscRspCmd( zclIncomingMsg_t *pInMsg );
-#endif
-
-/*********************************************************************
- * ZCL General Profile Callback table
- */
-static zclGeneral_AppCallbacks_t zclSampleLight_CmdCallbacks =
-{
-  NULL,                                   // Basic Cluster Reset command
-  NULL,                                   // Identify command
-  NULL,                                   // Identify Trigger Effect command
-  NULL,                                   // Identify Query Response command
-  NULL,                                   // On/Off cluster commands
-  NULL,                                   // On/Off cluster enhanced command Off with Effect
-  NULL,                                   // On/Off cluster enhanced command On with Recall Global Scene
-  NULL,                                   // On/Off cluster enhanced command On with Timed Off
-  NULL,                                   // Level Control Move to Level command
-  NULL,                                   // Level Control Move command
-  NULL,                                   // Level Control Step command
-  NULL,                                   // Level Control Stop command
-  NULL,                                   // Group Response commands
-  NULL,                                   // Scene Store Request command
-  NULL,                                   // Scene Recall Request command
-  NULL,                                   // Scene Response command
-  NULL,                                   // Alarm (Response) commands
-  NULL,                                   // RSSI Location command
-  NULL                                    // RSSI Location Response command
-};
-
-void zclEnergyHarvester_Init( byte task_id )
-{
+void zclEnergyHarvester_Init( byte task_id ) {
   zclEnergyHarvester_TaskID = task_id;
 
   // This app is part of the Home Automation Profile
   zclHA_Init( &zclSampleLight_SimpleDesc );
-  
-  // Register the ZCL General Cluster Library callback functions
-  zclGeneral_RegisterCmdCallbacks( ENDPOINT, &zclSampleLight_CmdCallbacks );
-
-  // Register the application's attribute list
-  zcl_registerAttrList( ENDPOINT, SAMPLELIGHT_MAX_ATTRIBUTES, zcl_Attrs );
-
-  // Register the Application to receive the unprocessed Foundation command/response messages
-  //zcl_registerForMsg( zclEnergyHarvester_TaskID );
 
   // Register for a test endpoint
-  afRegister( &sampleLight_TestEp );
+  afRegister( &testEp );
   
   zcl_registerPlugin( ZCL_CLUSTER_ID_MS_ILLUMINANCE_MEASUREMENT,
     ZCL_CLUSTER_ID_MS_OCCUPANCY_SENSING,
@@ -184,11 +134,6 @@ uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
   if ( events & SYS_EVENT_MSG ) {
     while ( (MSGpkt = (afIncomingMSGPacket_t *)osal_msg_receive( zclEnergyHarvester_TaskID )) ) {
       switch ( MSGpkt->hdr.event ) {
-        case ZCL_INCOMING_MSG:
-          // Incoming ZCL Foundation command/response messages
-          zclSampleLight_ProcessIncomingMsg( ( zclIncomingMsg_t * )MSGpkt );
-          break;
- 
         case ZDO_STATE_CHANGE:
           zcl_ProcessZdoStateChange( ( osal_event_hdr_t * )MSGpkt );
           break;
@@ -273,13 +218,6 @@ static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
         zcl_SendBindRequest();
       }
       break;
-    
-#if DEV_TYPE == COORDINATOR
-    case ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT:
-      debug_str( "Got a 'Sensor Response.' Whatever we decide that to be" );
-      HalLedSet( HAL_LED_4, HAL_LED_MODE_TOGGLE );
-      break;
-#endif
   }
 }
 
@@ -416,173 +354,3 @@ static void zclSampleLight_ProcessIdentifyTimeChange( void )
     osal_stop_timerEx( zclEnergyHarvester_TaskID, SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT );
   }
 }
-
-/****************************************************************************** 
- * 
- *  Functions for processing ZCL Foundation incoming Command/Response messages
- *
- *****************************************************************************/
-
-/*********************************************************************
- * @fn      zclSampleLight_ProcessIncomingMsg
- *
- * @brief   Process ZCL Foundation incoming message
- *
- * @param   pInMsg - pointer to the received message
- *
- * @return  none
- */
-static void zclSampleLight_ProcessIncomingMsg( zclIncomingMsg_t *pInMsg)
-{
-  switch ( pInMsg->zclHdr.commandID )
-  {
-#ifdef ZCL_READ
-    case ZCL_CMD_READ_RSP:
-      zclSampleLight_ProcessInReadRspCmd( pInMsg );
-      break;
-#endif
-#ifdef ZCL_WRITE    
-    case ZCL_CMD_WRITE_RSP:
-      zclSampleLight_ProcessInWriteRspCmd( pInMsg );
-      break;
-#endif
-#ifdef ZCL_REPORT
-    // See ZCL Test Applicaiton (zcl_testapp.c) for sample code on Attribute Reporting
-    case ZCL_CMD_CONFIG_REPORT:
-      //zclSampleLight_ProcessInConfigReportCmd( pInMsg );
-      break;
-    
-    case ZCL_CMD_CONFIG_REPORT_RSP:
-      //zclSampleLight_ProcessInConfigReportRspCmd( pInMsg );
-      break;
-    
-    case ZCL_CMD_READ_REPORT_CFG:
-      //zclSampleLight_ProcessInReadReportCfgCmd( pInMsg );
-      break;
-    
-    case ZCL_CMD_READ_REPORT_CFG_RSP:
-      //zclSampleLight_ProcessInReadReportCfgRspCmd( pInMsg );
-      break;
-    
-    case ZCL_CMD_REPORT:
-      //zclSampleLight_ProcessInReportCmd( pInMsg );
-      break;
-#endif   
-    case ZCL_CMD_DEFAULT_RSP:
-      zclSampleLight_ProcessInDefaultRspCmd( pInMsg );
-      break;
-#ifdef ZCL_DISCOVER     
-    case ZCL_CMD_DISCOVER_RSP:
-      zclSampleLight_ProcessInDiscRspCmd( pInMsg );
-      break;
-#endif  
-    default:
-      break;
-  }
-  
-  if ( pInMsg->attrCmd )
-    osal_mem_free( pInMsg->attrCmd );
-}
-
-#ifdef ZCL_READ
-/*********************************************************************
- * @fn      zclSampleLight_ProcessInReadRspCmd
- *
- * @brief   Process the "Profile" Read Response Command
- *
- * @param   pInMsg - incoming message to process
- *
- * @return  none
- */
-static uint8 zclSampleLight_ProcessInReadRspCmd( zclIncomingMsg_t *pInMsg )
-{
-  zclReadRspCmd_t *readRspCmd;
-  uint8 i;
-
-  readRspCmd = (zclReadRspCmd_t *)pInMsg->attrCmd;
-  for (i = 0; i < readRspCmd->numAttr; i++)
-  {
-    // Notify the originator of the results of the original read attributes 
-    // attempt and, for each successfull request, the value of the requested 
-    // attribute
-  }
-
-  return TRUE; 
-}
-#endif // ZCL_READ
-
-#ifdef ZCL_WRITE
-/*********************************************************************
- * @fn      zclSampleLight_ProcessInWriteRspCmd
- *
- * @brief   Process the "Profile" Write Response Command
- *
- * @param   pInMsg - incoming message to process
- *
- * @return  none
- */
-static uint8 zclSampleLight_ProcessInWriteRspCmd( zclIncomingMsg_t *pInMsg )
-{
-  zclWriteRspCmd_t *writeRspCmd;
-  uint8 i;
-
-  writeRspCmd = (zclWriteRspCmd_t *)pInMsg->attrCmd;
-  for (i = 0; i < writeRspCmd->numAttr; i++)
-  {
-    // Notify the device of the results of the its original write attributes
-    // command.
-  }
-
-  return TRUE; 
-}
-#endif // ZCL_WRITE
-
-/*********************************************************************
- * @fn      zclSampleLight_ProcessInDefaultRspCmd
- *
- * @brief   Process the "Profile" Default Response Command
- *
- * @param   pInMsg - incoming message to process
- *
- * @return  none
- */
-static uint8 zclSampleLight_ProcessInDefaultRspCmd( zclIncomingMsg_t *pInMsg )
-{
-  // zclDefaultRspCmd_t *defaultRspCmd = (zclDefaultRspCmd_t *)pInMsg->attrCmd;
-   
-  // Device is notified of the Default Response command.
-  (void)pInMsg;
-  
-  return TRUE; 
-}
-
-#ifdef ZCL_DISCOVER
-/*********************************************************************
- * @fn      zclSampleLight_ProcessInDiscRspCmd
- *
- * @brief   Process the "Profile" Discover Response Command
- *
- * @param   pInMsg - incoming message to process
- *
- * @return  none
- */
-static uint8 zclSampleLight_ProcessInDiscRspCmd( zclIncomingMsg_t *pInMsg )
-{
-  zclDiscoverRspCmd_t *discoverRspCmd;
-  uint8 i;
-  
-  discoverRspCmd = (zclDiscoverRspCmd_t *)pInMsg->attrCmd;
-  for ( i = 0; i < discoverRspCmd->numAttr; i++ )
-  {
-    // Device is notified of the result of its attribute discovery command.
-  }
-  
-  return TRUE;
-}
-#endif // ZCL_DISCOVER
-
-
-/****************************************************************************
-****************************************************************************/
-
-
