@@ -82,10 +82,9 @@ byte zclEnergyHarvester_TaskID;
  * LOCAL VARIABLES
  */
 
-#define ZCL_BINDINGLIST       2
+#define ZCL_BINDINGLIST       1
 static cId_t bindingInClusters[ZCL_BINDINGLIST] =
 {
-  ZCL_CLUSTER_ID_GEN_ON_OFF,
   ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT
 };
 

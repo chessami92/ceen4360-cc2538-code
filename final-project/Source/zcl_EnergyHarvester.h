@@ -51,7 +51,7 @@ extern "C"
  */
 #define ENDPOINT 13
 
-#define SAMPLELIGHT_MAX_ATTRIBUTES      12
+#define ENERGY_HARVESTER_MAX_ATTRIBUTES 1
 
 #define LIGHT_OFF                       0x00
 #define LIGHT_ON                        0x01
