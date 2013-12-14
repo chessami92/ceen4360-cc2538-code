@@ -94,7 +94,7 @@ CONST zclAttrRec_t zcl_Attrs[ENERGY_HARVESTER_MAX_ATTRIBUTES] =
 {
   // *** Metering Attributes ***
   {
-    ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT,
+    ZCL_CLUSTER_ID_MS_ALL,
     { // Attribute record
       ATTRID_ON_OFF,
       ZCL_DATATYPE_UINT8,
@@ -109,21 +109,14 @@ CONST zclAttrRec_t zcl_Attrs[ENERGY_HARVESTER_MAX_ATTRIBUTES] =
  */
 // This is the Cluster ID List and should be filled with Application
 // specific cluster IDs.
-#define ZCLSAMPLELIGHT_MAX_INCLUSTERS       6
-const cId_t zclSampleLight_InClusterList[ZCLSAMPLELIGHT_MAX_INCLUSTERS] =
-{
-  ZCL_CLUSTER_ID_GEN_BASIC,
-  ZCL_CLUSTER_ID_GEN_SCENES,
-  ZCL_CLUSTER_ID_GEN_GROUPS,
-  ZCL_CLUSTER_ID_GEN_ON_OFF,
-  ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL,
-  ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT
+#define ENERGY_HARVESTER_MAX_INCLUSTERS      1
+const cId_t zclSampleLight_InClusterList[ENERGY_HARVESTER_MAX_INCLUSTERS] = {
+  ZCL_CLUSTER_ID_MS_ALL
 };
 
-#define ZCLSAMPLELIGHT_MAX_OUTCLUSTERS       1
-const cId_t zclSampleLight_OutClusterList[ZCLSAMPLELIGHT_MAX_OUTCLUSTERS] =
-{
-  ZCL_CLUSTER_ID_GEN_BASIC
+#define ENERGY_HARVESTER_MAX_OUTCLUSTERS     1
+const cId_t zclSampleLight_OutClusterList[ENERGY_HARVESTER_MAX_OUTCLUSTERS] = {
+  ZCL_CLUSTER_ID_MS_ALL
 };
 
 SimpleDescriptionFormat_t zclSampleLight_SimpleDesc =
@@ -133,9 +126,9 @@ SimpleDescriptionFormat_t zclSampleLight_SimpleDesc =
   ZCL_HA_DEVICEID_DIMMABLE_LIGHT,        //  uint16 AppDeviceId[2];
   SAMPLELIGHT_DEVICE_VERSION,            //  int   AppDevVer:4;
   SAMPLELIGHT_FLAGS,                     //  int   AppFlags:4;
-  ZCLSAMPLELIGHT_MAX_INCLUSTERS,         //  byte  AppNumInClusters;
+  ENERGY_HARVESTER_MAX_INCLUSTERS,       //  byte  AppNumInClusters;
   (cId_t *)zclSampleLight_InClusterList, //  byte *pAppInClusterList;
-  ZCLSAMPLELIGHT_MAX_OUTCLUSTERS,        //  byte  AppNumInClusters;
+  ENERGY_HARVESTER_MAX_OUTCLUSTERS,      //  byte  AppNumInClusters;
   (cId_t *)zclSampleLight_OutClusterList //  byte *pAppInClusterList;
 };
 

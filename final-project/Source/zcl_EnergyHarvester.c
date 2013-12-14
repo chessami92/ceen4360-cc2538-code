@@ -83,9 +83,8 @@ byte zclEnergyHarvester_TaskID;
  */
 
 #define ZCL_BINDINGLIST       1
-static cId_t bindingInClusters[ZCL_BINDINGLIST] =
-{
-  ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT
+static cId_t bindingInClusters[ZCL_BINDINGLIST] = {
+  ZCL_CLUSTER_ID_MS_ALL
 };
 
 // Test Endpoint to allow SYS_APP_MSGs
@@ -106,7 +105,6 @@ static void zcl_SendBindRequest( void );
 #if DEV_TYPE != COORDINATOR
 static void zcl_SendDeviceData( void );
 #endif
-static void zclSampleLight_ProcessIdentifyTimeChange( void );
 
 void zclEnergyHarvester_Init( byte task_id ) {
   zclEnergyHarvester_TaskID = task_id;
@@ -118,7 +116,7 @@ void zclEnergyHarvester_Init( byte task_id ) {
   afRegister( &testEp );
   
   zcl_registerPlugin( ZCL_CLUSTER_ID_MS_ILLUMINANCE_MEASUREMENT,
-    ZCL_CLUSTER_ID_MS_OCCUPANCY_SENSING,
+    ZCL_CLUSTER_ID_MS_ALL,
     zclEnergyHarvester_HdlIncoming );
   
   ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, End_Device_Bind_rsp );
@@ -154,7 +152,6 @@ uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
     if ( zclSampleLight_IdentifyTime > 0 ) {
       zclSampleLight_IdentifyTime--;
     }
-    zclSampleLight_ProcessIdentifyTimeChange();
 
     return ( events ^ SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT );
   }
@@ -308,7 +305,7 @@ static void zcl_SendDeviceData( void ) {
   ZStatus_t response;
   
   response = zcl_SendCommand( ENDPOINT, &dstAddr,
-    ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT, COMMAND_OFF,
+    ZCL_CLUSTER_ID_MS_ALL, COMMAND_OFF,
     TRUE, ZCL_FRAME_CLIENT_SERVER_DIR,
     FALSE, 0, 0,
     11, "Hello World" );
@@ -318,29 +315,3 @@ static void zcl_SendDeviceData( void ) {
   }
 }
 #endif
-
-/*********************************************************************
- * @fn      zclSampleLight_ProcessIdentifyTimeChange
- *
- * @brief   Called to process any change to the IdentifyTime attribute.
- *
- * @param   none
- *
- * @return  none
- */
-static void zclSampleLight_ProcessIdentifyTimeChange( void )
-{
-  if ( zclSampleLight_IdentifyTime > 0 )
-  {
-    osal_start_timerEx( zclEnergyHarvester_TaskID, SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT, 1000 );
-    HalLedBlink ( HAL_LED_4, 0xFF, HAL_LED_DEFAULT_DUTY_CYCLE, HAL_LED_DEFAULT_FLASH_TIME );
-  }
-  else
-  {
-    if ( zclSampleLight_OnOff )
-      HalLedSet ( HAL_LED_4, HAL_LED_MODE_ON );
-    else
-      HalLedSet ( HAL_LED_4, HAL_LED_MODE_OFF );
-    osal_stop_timerEx( zclEnergyHarvester_TaskID, SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT );
-  }
-}
