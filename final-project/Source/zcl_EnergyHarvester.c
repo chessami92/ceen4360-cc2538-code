@@ -173,9 +173,6 @@ void zclEnergyHarvester_Init( byte task_id )
     zclEnergyHarvester_HdlIncoming );
   
   ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, End_Device_Bind_rsp );
-#if DEV_TYPE == COORDINATOR
-  ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT );
-#endif
 }
 
 uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
