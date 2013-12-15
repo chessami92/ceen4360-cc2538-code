@@ -50,9 +50,10 @@
 
 /* HAL */
 #include "hal_led.h"
+#include "zcl_adc.h"
 
 #include "DebugTrace.h"
-
+#include <string.h>
 
 /*********************************************************************
  * MACROS
@@ -81,6 +82,7 @@ byte zclEnergyHarvester_TaskID;
 /*********************************************************************
  * LOCAL VARIABLES
  */
+static zAddrType_t dstAddr;
 
 #define ZCL_BINDINGLIST       1
 static cId_t bindingInClusters[ZCL_BINDINGLIST] = {
@@ -120,6 +122,8 @@ void zclEnergyHarvester_Init( byte task_id ) {
     zclEnergyHarvester_HdlIncoming );
   
   ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, End_Device_Bind_rsp );
+    
+  adc_Init();
 }
 
 uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
@@ -267,9 +271,7 @@ static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg ) {
  *
  * @return  none
  */
-static void zcl_SendBindRequest( void ) {
-  zAddrType_t dstAddr;
-  
+static void zcl_SendBindRequest( void ) {  
   dstAddr.addrMode = afAddr16Bit;
   dstAddr.addr.shortAddr = 0;   // Coordinator makes the match
 
@@ -301,17 +303,31 @@ static void zcl_SendBindRequest( void ) {
  * @return  none
  */
 static void zcl_SendDeviceData( void ) {  
-  afAddrType_t dstAddr;
+  afAddrType_t afDstAddr;
   ZStatus_t response;
+  uint8 *temperature;
+  uint8 dataLength;
+  uint8 *data;
   
-  response = zcl_SendCommand( ENDPOINT, &dstAddr,
+  afDstAddr.addr.shortAddr = dstAddr.addr.shortAddr;
+  afDstAddr.addrMode = ( afAddrMode_t )dstAddr.addrMode;
+  afDstAddr.endPoint = ENDPOINT;
+ 
+  temperature = readTemperature();
+  dataLength = strlen( ( char* )temperature ) + 1;
+  data = ( uint8* )osal_mem_alloc( dataLength );
+  strcpy( ( char* )data, ( char* )temperature );
+  
+  response = zcl_SendCommand( ENDPOINT, &afDstAddr,
     ZCL_CLUSTER_ID_MS_ALL, COMMAND_OFF,
     TRUE, ZCL_FRAME_CLIENT_SERVER_DIR,
     FALSE, 0, 0,
-    11, "Hello World" );
+    dataLength, data );
   
   if( response == ZSuccess ) {
     debug_str( "Successfully sent message." );
   }
+  
+  osal_mem_free( data );
 }
 #endif

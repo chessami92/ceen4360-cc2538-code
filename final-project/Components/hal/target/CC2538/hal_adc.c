@@ -277,6 +277,7 @@ void HalAdcSetReference ( uint8 reference )
  *********************************************************************/
 bool HalAdcCheckVdd(uint8 vdd)
 {
+  if (!(ADCCON1 & 0x80)) return 1;
   ADCCON3 = 0x0F;
   while (!(ADCCON1 & 0x80));
   return (ADCH > vdd);
