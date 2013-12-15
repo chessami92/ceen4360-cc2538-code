@@ -53,6 +53,7 @@
 #include "zcl_adc.h"
 
 #include "DebugTrace.h"
+#include <stdio.h>
 #include <string.h>
 
 /*********************************************************************
@@ -83,6 +84,7 @@ byte zclEnergyHarvester_TaskID;
  * LOCAL VARIABLES
  */
 static zAddrType_t dstAddr;
+static uint8 childAddr[Z_EXTADDR_LEN];
 
 #define ZCL_BINDINGLIST       1
 static cId_t bindingInClusters[ZCL_BINDINGLIST] = {
@@ -122,6 +124,7 @@ void zclEnergyHarvester_Init( byte task_id ) {
     zclEnergyHarvester_HdlIncoming );
   
   ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, End_Device_Bind_rsp );
+  ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, Device_annce );
     
   adc_Init();
 }
@@ -180,8 +183,8 @@ static void zcl_ProcessZdoStateChange(osal_event_hdr_t *pMsg) {
       debug_str( "Successfully started network." );
 #else
       debug_str( "Successfully connected to network." );
-#endif
       zcl_SendBindRequest();
+#endif
       break;
       
     case DEV_NWK_ORPHAN:
@@ -207,17 +210,25 @@ static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
       response = ZDO_ParseBindRsp( inMsg );
       if ( response == ZSuccess ) {
         debug_str( "Bind succeeded." );
-#if DEV_TYPE == COORDINATOR
-        // Try to bind another device immediately.
-        zcl_SendBindRequest();
-#else
+#if DEV_TYPE != COORDINATOR
+        HalLedSet( HAL_LED_4, HAL_LED_MODE_TOGGLE );
         zcl_SendDeviceData();
 #endif
-      } else {
-        debug_str( "Bind failed; trying again." );
-        zcl_SendBindRequest();
       }
       break;
+
+#if DEV_TYPE == COORDINATOR      
+    case Device_annce: {
+      ZDO_DeviceAnnce_t msg;
+      uint8 buffer[50];
+      
+      ZDO_ParseDeviceAnnce( inMsg, &msg );
+      sprintf( ( char* )buffer, "New device joined, address: %d", msg.nwkAddr );
+      memcpy( childAddr, msg.extAddr, Z_EXTADDR_LEN );
+      zcl_SendBindRequest();
+      }
+      break;
+#endif
   }
 }
 
@@ -234,8 +245,15 @@ static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
  */
 static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg ) {
   ZStatus_t stat = ZSuccess;
+  NLME_LeaveReq_t leaveReq = {childAddr, FALSE, TRUE, TRUE};
   
   debug_str( pInMsg->pData );
+  
+  HalLedSet( HAL_LED_4, HAL_LED_MODE_TOGGLE );
+  
+  bindRemoveDev( &dstAddr );
+  
+  NLME_LeaveReq( &leaveReq );
   
   if ( zcl_ClusterCmd( pInMsg->hdr.fc.type ) )
   {
