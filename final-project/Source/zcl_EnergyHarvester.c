@@ -245,9 +245,13 @@ static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
  */
 static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg ) {
   ZStatus_t stat = ZSuccess;
+  uint8 buffer[50];
+  uint8 temperatureLength;
   NLME_LeaveReq_t leaveReq = {childAddr, FALSE, TRUE, TRUE};
   
-  debug_str( pInMsg->pData );
+  temperatureLength = strlen( ( char* )pInMsg->pData );
+  sprintf( ( char* )buffer, "Node temperature: %s, Node battery voltage: %s.", pInMsg->pData, pInMsg->pData + temperatureLength + 1 );
+  debug_str( buffer );
   
   HalLedSet( HAL_LED_4, HAL_LED_MODE_TOGGLE );
   
@@ -324,7 +328,8 @@ static void zcl_SendDeviceData( void ) {
   afAddrType_t afDstAddr;
   ZStatus_t response;
   uint8 *temperature;
-  uint8 dataLength;
+  uint8 *battery;
+  uint8 temperatureLength, batteryLength, dataLength;
   uint8 *data;
   
   afDstAddr.addr.shortAddr = dstAddr.addr.shortAddr;
@@ -332,9 +337,14 @@ static void zcl_SendDeviceData( void ) {
   afDstAddr.endPoint = ENDPOINT;
  
   temperature = readTemperature();
-  dataLength = strlen( ( char* )temperature ) + 1;
+  temperatureLength = strlen( ( char* )temperature );
+  battery = readBattery();
+  batteryLength = strlen( ( char* )battery );
+  
+  dataLength = temperatureLength + batteryLength + 2;
   data = ( uint8* )osal_mem_alloc( dataLength );
   strcpy( ( char* )data, ( char* )temperature );
+  strcpy( ( char* )data + temperatureLength + 1, ( char* )battery );
   
   response = zcl_SendCommand( ENDPOINT, &afDstAddr,
     ZCL_CLUSTER_ID_MS_ALL, COMMAND_OFF,

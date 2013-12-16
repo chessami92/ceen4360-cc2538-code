@@ -5,6 +5,9 @@
 #include "sys_ctrl.h"
 #include "hw_cctest.h"
 #include "hw_rfcore_xreg.h"
+#include "gpio.h"
+#include "hw_memmap.h"
+#include "ioc.h"
 
 #include "zcl.h"
 #include <stdio.h>
@@ -44,6 +47,7 @@ static volatile uint16 reading;
  */
 static float convertToTemperature( uint16_t reading );
 static void temperatureReadComplete( void );
+static void floatToString( uint8* buffer, float number );
 
 void adc_Init( void ) {  
   // Enable RF Core
@@ -57,25 +61,47 @@ void adc_Init( void ) {
   
   SOCADCSingleConfigure( SOCADC_12_BIT, SOCADC_REF_INTERNAL );
   SOCADCIntRegister( temperatureReadComplete );
+  
+  // Configure port A pin 7 to be analog input
+  IOCPadConfigSet(GPIO_A_BASE, GPIO_PIN_7, IOC_OVERRIDE_ANA);
+  GPIODirModeSet(GPIO_A_BASE, GPIO_PIN_7, GPIO_DIR_MODE_IN);
 }
 
 uint8* readTemperature( void ) {
   float temperature;
-  uint8 integer, fraction;
   static uint8 buffer[10];
   
   reading = 0;
-  
   SOCADCSingleStart( SOCADC_TEMP_SENS );
   while( !reading );
   
   temperature = convertToTemperature( reading );
-  integer = ( int )temperature;
-  temperature = ( temperature - integer ) * 100;
-  fraction = ( int )temperature;
-  sprintf( ( char* )buffer, "%d.%d", integer, fraction );
+  floatToString( buffer, temperature );
   
   return buffer;
+}
+
+uint8* readBattery( void ) {
+  float voltage;
+  static uint8 buffer[10];
+  
+  reading = 0;
+  SOCADCSingleStart( SOCADC_AIN7 );
+  while( !reading );
+  
+  voltage = reading / 2047.0 * 11.0 * 2.3;
+  floatToString( buffer, voltage );
+  
+  return buffer;
+}
+
+static void floatToString( uint8* buffer, float number ) {
+  uint8 integer, fraction;
+  
+  integer = ( int )number;
+  number = ( number - integer ) * 100;
+  fraction = ( int )number;
+  sprintf( ( char* )buffer, "%d.%d", integer, fraction );
 }
 
 static void temperatureReadComplete( void ) {

@@ -28,6 +28,7 @@ extern "C"
  */
 extern void adc_Init( void );
 extern uint8* readTemperature( void );
+extern uint8* readBattery( void );
 
 /*********************************************************************
 *********************************************************************/
