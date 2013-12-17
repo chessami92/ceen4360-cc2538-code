@@ -175,8 +175,8 @@
           <state>ewarm</state>
           <state>ZTOOL_P1</state>
           <state>MT_TASK</state>
-          <state>xMT_SYS_FUNC</state>
-          <state>xMT_ZDO_FUNC</state>
+          <state>MT_SYS_FUNC</state>
+          <state>MT_ZDO_FUNC</state>
           <state>LCD_SUPPORTED=DEBUG</state>
           <state>CC2538_USE_ALTERNATE_INTERRUPT_MAP=1</state>
           <state>xTC_LINKKEY_JOIN</state>
@@ -2129,13 +2129,14 @@
           <state>xPOWER_SAVING</state>
           <state>ZTOOL_P1</state>
           <state>MT_TASK</state>
-          <state>xMT_SYS_FUNC</state>
-          <state>xMT_ZDO_FUNC</state>
-          <state>LCD_SUPPORTED=DEBUG</state>
+          <state>MT_SYS_FUNC</state>
+          <state>MT_ZDO_FUNC</state>
+          <state>xLCD_SUPPORTED=DEBUG</state>
           <state>CC2538_USE_ALTERNATE_INTERRUPT_MAP=1</state>
           <state>xTC_LINKKEY_JOIN</state>
           <state>HAL_UART_USB</state>
           <state>USB_SETUP_MAX_NUMBER_OF_INTERFACES=1</state>
+          <state>OSC32K_CRYSTAL_INSTALLED=0</state>
           <state>DEV_TYPE=2</state>
         </option>
         <option>
@@ -2938,6 +2939,12 @@
       <name>$PROJ_DIR$\Source\OSAL_EnergyHarvester.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\Source\zcl_adc.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Source\zcl_adc.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\Source\zcl_EnergyHarvester.c</name>
     </file>
     <file>
@@ -3027,9 +3034,6 @@
         </file>
         <file>
           <name>$PROJ_DIR$\Components\hal\target\CC2538\hal_sys_ctrl.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\Components\hal\target\CC2538\hal_systick.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\Components\hal\target\CC2538\hal_uart.c</name>
@@ -3423,6 +3427,9 @@
   </group>
   <group>
     <name>Services</name>
+    <file>
+      <name>$PROJ_DIR$\Components\hal\target\CC2538\hal_systick.c</name>
+    </file>
     <file>
       <name>$PROJ_DIR$\Components\services\saddr\saddr.c</name>
     </file>
