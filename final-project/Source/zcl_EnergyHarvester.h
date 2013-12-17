@@ -58,7 +58,6 @@ extern "C"
 
 // Application Events
 #define SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT     0x0001
-#define SHUTDOWN_TIMER                       0x0002
 
 /*********************************************************************
  * MACROS

@@ -88,10 +88,12 @@ byte zclEnergyHarvester_TaskID;
  * LOCAL VARIABLES
  */
 static zAddrType_t dstAddr;
+#if DEV_TYPE == COORDINATOR
 static uint8 childAddr[Z_EXTADDR_LEN];
+#endif
 
 #define ZCL_BINDINGLIST       1
-static cId_t bindingInClusters[ZCL_BINDINGLIST] = {
+static cId_t bindingClusters[ZCL_BINDINGLIST] = {
   ZCL_CLUSTER_ID_MS_ALL
 };
 
@@ -112,7 +114,10 @@ static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg );
 static void zcl_SendBindRequest( void );
 #if DEV_TYPE != COORDINATOR
 static void zcl_SendDeviceData( void );
+#else
+static void zcl_SendAck( void );
 #endif
+static void zcl_SendData( uint8 dataLength, uint8 *data );
 
 void zclEnergyHarvester_Init( byte task_id ) {
   zclEnergyHarvester_TaskID = task_id;
@@ -128,8 +133,10 @@ void zclEnergyHarvester_Init( byte task_id ) {
     zclEnergyHarvester_HdlIncoming );
   
   ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, End_Device_Bind_rsp );
+  
+#if DEV_TYPE == COORDINATOR
   ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, Device_annce );
-    
+#else
   adc_Init();
   
   // Configure signal from off-chip timer to be wake-up signal
@@ -146,6 +153,7 @@ void zclEnergyHarvester_Init( byte task_id ) {
   
   // Done with off-chip timer acknowledge
   GPIOPinWrite( GPIO_B_BASE, GPIO_PIN_5, GPIO_PIN_5 );
+#endif
 }
 
 uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
@@ -180,12 +188,6 @@ uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
     }
 
     return ( events ^ SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT );
-  }
-  
-  if( events & SHUTDOWN_TIMER ) {
-    SysCtrlDeepSleep();
-    SysCtrlReset();
-    return ( events ^ SHUTDOWN_TIMER );
   }
 
   // Discard unknown events
@@ -236,7 +238,6 @@ static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
       if ( response == ZSuccess ) {
         debug_str( "Bind succeeded." );
 #if DEV_TYPE != COORDINATOR
-        HalLedSet( HAL_LED_4, HAL_LED_MODE_TOGGLE );
         zcl_SendDeviceData();
 #endif
       }
@@ -251,6 +252,8 @@ static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
       sprintf( ( char* )buffer, "New device joined, address: %d", msg.nwkAddr );
       memcpy( childAddr, msg.extAddr, Z_EXTADDR_LEN );
       zcl_SendBindRequest();
+      
+      dstAddr.addr.shortAddr = msg.nwkAddr;
       }
       break;
 #endif
@@ -269,44 +272,23 @@ static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
  * @return  ZStatus_t
  */
 static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg ) {
-  ZStatus_t stat = ZSuccess;
+#if DEV_TYPE==COORDINATOR
   uint8 buffer[50];
   uint8 temperatureLength;
-  NLME_LeaveReq_t leaveReq = {childAddr, FALSE, TRUE, TRUE};
   
   temperatureLength = strlen( ( char* )pInMsg->pData );
   sprintf( ( char* )buffer, "Node temperature: %s, Node battery voltage: %s.", pInMsg->pData, pInMsg->pData + temperatureLength + 1 );
   debug_str( buffer );
   
-  HalLedSet( HAL_LED_4, HAL_LED_MODE_TOGGLE );
-  
-  bindRemoveDev( &dstAddr );
-  
-  NLME_LeaveReq( &leaveReq );
-  
-  if ( zcl_ClusterCmd( pInMsg->hdr.fc.type ) )
-  {
-    
-    stat = ZFailure;
-    
-    /*// Is this a manufacturer specific command?
-    if ( pInMsg->hdr.fc.manuSpecific == 0 )
-    {
-      stat = zclGeneral_HdlInSpecificCommands( pInMsg );
-    }
-    else
-    {
-      // We don't support any manufacturer specific command.
-      stat = ZFailure;
-    }*/
+  zcl_SendAck();
+#else
+  if( strcmp( ( char* )pInMsg->pData, "SHUTDOWN" ) == 0 ) {
+    SysCtrlDeepSleep();
+    SysCtrlReset();
   }
-  else
-  {
-    // Handle all the normal (Read, Write...) commands -- should never get here
-    stat = ZFailure;
-  }
+#endif
   
-  return ( stat );
+  return ( ZSuccess );
 }
 
 /*********************************************************************
@@ -321,25 +303,29 @@ static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg ) {
 static void zcl_SendBindRequest( void ) {  
   dstAddr.addrMode = afAddr16Bit;
   dstAddr.addr.shortAddr = 0;   // Coordinator makes the match
-
-#if DEV_TYPE == COORDINATOR
+  
   ZDP_EndDeviceBindReq( &dstAddr, NLME_GetShortAddr(),
     ENDPOINT,
     ZCL_HA_PROFILE_ID,
-    ZCL_BINDINGLIST, bindingInClusters,
-    0, NULL,   // No Outgoing clusters to bind
+    ZCL_BINDINGLIST, bindingClusters,
+    ZCL_BINDINGLIST, bindingClusters,
     TRUE );
-#else
-  ZDP_EndDeviceBindReq( &dstAddr, NLME_GetShortAddr(),
-    ENDPOINT,
-    ZCL_HA_PROFILE_ID,
-    0, NULL,   // No incoming clusters to bind
-    ZCL_BINDINGLIST, bindingInClusters,
-    TRUE );
-#endif
 }
 
-#if DEV_TYPE != COORDINATOR
+#if DEV_TYPE == COORDINATOR
+/*********************************************************************
+ * @fn      zcl_SendAck
+ *
+ * @brief   Let sensor node know that data was received.
+ *
+ * @param   none
+ *
+ * @return  none
+ */
+static void zcl_SendAck( void ) {  
+  zcl_SendData( 9, "SHUTDOWN" );
+}
+#else
 /*********************************************************************
  * @fn      zcl_SendDeviceData
  *
@@ -350,16 +336,10 @@ static void zcl_SendBindRequest( void ) {
  * @return  none
  */
 static void zcl_SendDeviceData( void ) {  
-  afAddrType_t afDstAddr;
-  ZStatus_t response;
   uint8 *temperature;
   uint8 *battery;
   uint8 temperatureLength, batteryLength, dataLength;
   uint8 *data;
-  
-  afDstAddr.addr.shortAddr = dstAddr.addr.shortAddr;
-  afDstAddr.addrMode = ( afAddrMode_t )dstAddr.addrMode;
-  afDstAddr.endPoint = ENDPOINT;
  
   temperature = readTemperature();
   temperatureLength = strlen( ( char* )temperature );
@@ -371,16 +351,36 @@ static void zcl_SendDeviceData( void ) {
   strcpy( ( char* )data, ( char* )temperature );
   strcpy( ( char* )data + temperatureLength + 1, ( char* )battery );
   
+  zcl_SendData( dataLength, data );
+  
+  osal_mem_free( data );
+}
+#endif
+
+/*********************************************************************
+ * @fn      zcl_SendData
+ *
+ * @brief   Send data to bound node.
+ *
+ * @param   none
+ *
+ * @return  none
+ */
+static void zcl_SendData( uint8 dataLength, uint8 *data ) {
+  afAddrType_t afDstAddr;
+  ZStatus_t response;
+  
+  afDstAddr.addr.shortAddr = dstAddr.addr.shortAddr;
+  afDstAddr.addrMode = ( afAddrMode_t )dstAddr.addrMode;
+  afDstAddr.endPoint = ENDPOINT;
+  
   response = zcl_SendCommand( ENDPOINT, &afDstAddr,
     ZCL_CLUSTER_ID_MS_ALL, COMMAND_OFF,
-    TRUE, ZCL_FRAME_CLIENT_SERVER_DIR,
+    TRUE, ZCL_FRAME_SERVER_CLIENT_DIR,
     FALSE, 0, 0,
     dataLength, data );
   
   if( response == ZSuccess ) {
     debug_str( "Successfully sent message." );
   }
-  
-  osal_mem_free( data );
 }
-#endif
