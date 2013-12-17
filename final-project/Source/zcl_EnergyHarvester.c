@@ -48,10 +48,9 @@
 
 #include "zcl_EnergyHarvester.h"
 
-/* HAL */
-#include "hal_led.h"
 #include "zcl_adc.h"
 
+#include "gpio.h"
 #include "hw_memmap.h"
 #include "sys_ctrl.h"
 #include "hal_sys_ctrl.h"
@@ -88,9 +87,6 @@ byte zclEnergyHarvester_TaskID;
  * LOCAL VARIABLES
  */
 static zAddrType_t dstAddr;
-#if DEV_TYPE == COORDINATOR
-static uint8 childAddr[Z_EXTADDR_LEN];
-#endif
 
 #define ZCL_BINDINGLIST       1
 static cId_t bindingClusters[ZCL_BINDINGLIST] = {
@@ -115,9 +111,9 @@ static void zcl_SendBindRequest( void );
 #if DEV_TYPE != COORDINATOR
 static void zcl_SendDeviceData( void );
 #else
-static void zcl_SendAck( void );
+static void zcl_SendAck( uint16 destShortAddr );
 #endif
-static void zcl_SendData( uint8 dataLength, uint8 *data );
+static void zcl_SendData( uint8 dataLength, uint8 *data, uint16 destShortAddr );
 
 void zclEnergyHarvester_Init( byte task_id ) {
   zclEnergyHarvester_TaskID = task_id;
@@ -250,10 +246,7 @@ static void zcl_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg ) {
       
       ZDO_ParseDeviceAnnce( inMsg, &msg );
       sprintf( ( char* )buffer, "New device joined, address: %d", msg.nwkAddr );
-      memcpy( childAddr, msg.extAddr, Z_EXTADDR_LEN );
       zcl_SendBindRequest();
-      
-      dstAddr.addr.shortAddr = msg.nwkAddr;
       }
       break;
 #endif
@@ -280,7 +273,7 @@ static ZStatus_t zclEnergyHarvester_HdlIncoming( zclIncoming_t *pInMsg ) {
   sprintf( ( char* )buffer, "Node temperature: %s, Node battery voltage: %s.", pInMsg->pData, pInMsg->pData + temperatureLength + 1 );
   debug_str( buffer );
   
-  zcl_SendAck();
+  zcl_SendAck( pInMsg->msg->srcAddr.addr.shortAddr );
 #else
   if( strcmp( ( char* )pInMsg->pData, "SHUTDOWN" ) == 0 ) {
     SysCtrlDeepSleep();
@@ -322,8 +315,8 @@ static void zcl_SendBindRequest( void ) {
  *
  * @return  none
  */
-static void zcl_SendAck( void ) {  
-  zcl_SendData( 9, "SHUTDOWN" );
+static void zcl_SendAck( uint16 destShortAddr ) {  
+  zcl_SendData( 9, "SHUTDOWN", destShortAddr );
 }
 #else
 /*********************************************************************
@@ -351,7 +344,7 @@ static void zcl_SendDeviceData( void ) {
   strcpy( ( char* )data, ( char* )temperature );
   strcpy( ( char* )data + temperatureLength + 1, ( char* )battery );
   
-  zcl_SendData( dataLength, data );
+  zcl_SendData( dataLength, data, 0 );
   
   osal_mem_free( data );
 }
@@ -366,17 +359,17 @@ static void zcl_SendDeviceData( void ) {
  *
  * @return  none
  */
-static void zcl_SendData( uint8 dataLength, uint8 *data ) {
+static void zcl_SendData( uint8 dataLength, uint8 *data, uint16 destShortAddr ) {
   afAddrType_t afDstAddr;
   ZStatus_t response;
   
-  afDstAddr.addr.shortAddr = dstAddr.addr.shortAddr;
+  afDstAddr.addr.shortAddr = destShortAddr;
   afDstAddr.addrMode = ( afAddrMode_t )dstAddr.addrMode;
   afDstAddr.endPoint = ENDPOINT;
   
   response = zcl_SendCommand( ENDPOINT, &afDstAddr,
     ZCL_CLUSTER_ID_MS_ALL, COMMAND_OFF,
-    TRUE, ZCL_FRAME_SERVER_CLIENT_DIR,
+    TRUE, ZCL_FRAME_CLIENT_SERVER_DIR,
     FALSE, 0, 0,
     dataLength, data );
   
