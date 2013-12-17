@@ -52,6 +52,10 @@
 #include "hal_led.h"
 #include "zcl_adc.h"
 
+#include "hw_memmap.h"
+#include "sys_ctrl.h"
+#include "hal_sys_ctrl.h"
+
 #include "DebugTrace.h"
 #include <stdio.h>
 #include <string.h>
@@ -127,6 +131,21 @@ void zclEnergyHarvester_Init( byte task_id ) {
   ZDO_RegisterForZDOMsg( zclEnergyHarvester_TaskID, Device_annce );
     
   adc_Init();
+  
+  // Configure signal from off-chip timer to be wake-up signal
+  GPIODirModeSet( GPIO_B_BASE, GPIO_PIN_3 , GPIO_DIR_MODE_IN );
+  
+  // Configure deep sleep in power mode 3, woken up by off-chip timer
+  SysCtrlDeepSleepSetting();
+  SysCtrlPowerModeSet( SYS_CTRL_PM_3 );
+  GPIODirModeSet( GPIO_B_BASE, GPIO_PIN_4 , GPIO_DIR_MODE_IN );
+  HWREG( SYS_CTRL_IWE ) = 0x02;
+  GPIOPowIntTypeSet( GPIO_B_BASE, GPIO_PIN_4, GPIO_POW_RISING_EDGE );
+  GPIOPowIntClear( GPIO_B_BASE, GPIO_PIN_4 );
+  GPIOPowIntEnable( GPIO_B_BASE, GPIO_PIN_4 );
+  
+  // Done with off-chip timer acknowledge
+  GPIOPinWrite( GPIO_B_BASE, GPIO_PIN_5, GPIO_PIN_5 );
 }
 
 uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
@@ -161,6 +180,12 @@ uint16 zclEnergyHarvester_event_loop( uint8 task_id, uint16 events )
     }
 
     return ( events ^ SAMPLELIGHT_IDENTIFY_TIMEOUT_EVT );
+  }
+  
+  if( events & SHUTDOWN_TIMER ) {
+    SysCtrlDeepSleep();
+    SysCtrlReset();
+    return ( events ^ SHUTDOWN_TIMER );
   }
 
   // Discard unknown events

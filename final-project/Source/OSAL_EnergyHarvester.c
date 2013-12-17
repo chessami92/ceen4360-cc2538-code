@@ -58,6 +58,8 @@
 #endif
 
 #include "zcl_EnergyHarvester.h"
+#include "gpio.h"
+#include "hw_memmap.h"
 
 /*********************************************************************
  * GLOBAL VARIABLES
@@ -101,6 +103,10 @@ uint16 *tasksEvents;
  */
 void osalInitTasks( void )
 {
+  // Tell off-chip timer that the wake-up signal was received
+  GPIODirModeSet( GPIO_B_BASE, GPIO_PIN_5, GPIO_DIR_MODE_OUT );
+  GPIOPinWrite( GPIO_B_BASE, GPIO_PIN_5, GPIO_PIN_5 );
+  
   uint8 taskID = 0;
 
   tasksEvents = (uint16 *)osal_mem_alloc( sizeof( uint16 ) * tasksCnt);
