@@ -1,6 +1,5 @@
-*.dep
-*.ewd
-*.ewp
-*.eww
 */settings/*
 */Debug/*
+*/EndDevice/*
+*/Router/*
+*/Coordinator/*
